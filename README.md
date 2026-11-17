@@ -1,3 +1,16 @@
+> Unofficial build notice / 非官方声明
+>
+> This project is an unofficial Android packaging of the open-source
+> chat-demo (MIT). It is not affiliated with, endorsed by, or
+> connected to DeepSeek. Bring your own DeepSeek API key; your key
+> and conversations stay on your device.
+>
+> 本项目是开源 chat-demo (MIT) 的非官方 Android 打包，与 DeepSeek
+> 没有任何隶属或合作关系。请使用你自己的 DeepSeek API Key；
+> Key 与聊天记录只保存在本机。
+>
+> Upstream: https://github.com/deepseek-ai/chat-demo (base: v0.1.1)
+
 # chat-demo
 
 English | [简体中文](README.zh-CN.md)
@@ -73,3 +86,20 @@ src/
 ## License
 
 [MIT](LICENSE). The build copies the license to `dist/LICENSE`; include it when distributing the app. Third-party dependencies are subject to their own licenses.
+
+## Android build (Capacitor)
+
+- Web: `pnpm install`, then build the static site into `dist/`.
+  NOTE (Windows): the upstream `build` script uses Unix-only `rm` and
+  a `NODE_ENV=` prefix, so `pnpm build` fails on Windows as shipped.
+  Verified equivalent on Windows: set `NODE_ENV=production` and run
+  `pnpm exec rspack build -c rspack.config.ts` (rspack `clean: true`
+  replaces the `rm -rf dist` step). No upstream source was changed.
+- Sync web assets into the shell: `pnpm exec cap sync android`
+- Debug APK: open `android/` in Android Studio, or run
+  `gradlew assembleDebug` with JAVA_HOME set to the bundled JBR
+  (`D:\Android Studio\jbr`). Output:
+  `android/app/build/outputs/apk/debug/app-debug.apk`.
+- Working applicationId: `com.tsing.deepseekforchat` (changeable
+  before the first release; never a `com.deepseek.*` id). No release
+  signing is configured in this repo.
