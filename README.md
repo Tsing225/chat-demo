@@ -103,3 +103,14 @@ src/
 - Working applicationId: `com.tsing.deepseekforchat` (changeable
   before the first release; never a `com.deepseek.*` id). No release
   signing is configured in this repo.
+
+## 致谢
+
+- 上游项目：deepseek-ai/chat-demo（MIT，https://github.com/deepseek-ai/chat-demo）—— 本仓库基于 v0.1.1（commit 5d5dd75），聊天界面与聊天逻辑均来自该项目
+- API 服务：DeepSeek API（deepseek-flash）—— 对话、搜索、链接阅读与语音能力均由 DeepSeek API 提供
+- 打包框架：Capacitor —— 将网页版打包为 Android 应用
+
+## 反馈与联系
+
+- 问题反馈与建议：2012990260@qq.com
+- 联系群：1107601781
