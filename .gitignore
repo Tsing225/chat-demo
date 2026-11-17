@@ -9,3 +9,8 @@ build/
 .env.*
 !.env.example
 tmp/
+
+# --- signing secrets (never commit) ---
+keystore.properties
+*.jks
+*.keystore
