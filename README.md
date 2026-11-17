@@ -97,8 +97,12 @@ src/
   replaces the `rm -rf dist` step). No upstream source was changed.
 - Sync web assets into the shell: `pnpm exec cap sync android`
 - Debug APK: open `android/` in Android Studio, or run
-  `gradlew assembleDebug` with JAVA_HOME set to the bundled JBR
-  (`D:\Android Studio\jbr`). Output:
+  `gradlew assembleDebug` with JAVA_HOME set to a full JDK 21.
+  NOTE: Gradle 8.14.3 (Capacitor 8.6.2) cannot run on JBR 25 bundled
+  with Android Studio ("Unsupported class file major version 69"), and
+  the trimmed PyCharm JBR 21 fails too (no jlink). Install Temurin 21
+  in a durable location (or move the portable copy out of %TEMP%) and
+  point JAVA_HOME and the Studio Gradle JDK setting at it. Output:
   `android/app/build/outputs/apk/debug/app-debug.apk`.
 - Working applicationId: `com.tsing.deepseekforchat` (changeable
   before the first release; never a `com.deepseek.*` id). No release
