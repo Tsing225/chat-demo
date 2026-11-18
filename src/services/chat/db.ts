@@ -127,6 +127,31 @@ export const renameSession = async (id: string, title: string): Promise<void> =>
   ])
 }
 
+/** 置顶/归档状态与重命名同一模式：只读取该会话，在同一事务里更新详情和列表摘要。 */
+export const updateSessionFlags = async (
+  id: string,
+  flags: { pinned?: boolean; archived?: boolean }
+): Promise<void> => {
+  const tx = (await getDB()).transaction(['sessions', 'sessionSummaries'], 'readwrite')
+  await Promise.all([
+    (async () => {
+      try {
+        const sessions = tx.objectStore('sessions')
+        const session = await sessions.get(id)
+        if (session) {
+          Object.assign(session, flags)
+          await sessions.put(session)
+          await tx.objectStore('sessionSummaries').put(storedSummary(session))
+        }
+      } catch (error) {
+        abortTransaction(tx)
+        throw error
+      }
+    })(),
+    tx.done,
+  ])
+}
+
 /** 删除会话，仅清理已无会话引用的本地原件；远端文件不删。 */
 export const deleteSession = async (sessionId: string): Promise<void> => {
   const tx = (await getDB()).transaction(['sessions', 'sessionSummaries', 'files'], 'readwrite')

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { Fragment, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useIsMobile } from '../../app/viewport.js'
 import {
   buildMessageVersions,
@@ -12,6 +12,8 @@ import { AssistantMessage } from './AssistantMessage.js'
 import { ScrollToBottomContext } from './scrollContext.js'
 import { UserMessage } from './UserMessage.js'
 import type { Message } from '../../services/chat/types.js'
+import { useTranslate, type TranslationKey, type TranslationParams } from '../../i18n/index.js'
+import { useSettings, type Locale } from '../../services/settings.js'
 
 /**
  * 会话共用可重试的附件上传失败入口，覆盖当前提问与历史消息中的附件。
@@ -32,6 +34,36 @@ import styles from './MessageList.module.css'
 /** 距底部小于该值时视为在底部，流式内容增长时跟随 */
 const STICKY_THRESHOLD = 40
 const EMPTY_VERSIONS: MessageVersions = { ids: [], index: -1 }
+/** 相邻消息间隔超过该值时插入时间分割线；首条消息前始终有一条 */
+const TIME_DIVIDER_GAP = 5 * 60 * 1000
+const DAY = 86_400_000
+
+const pad2 = (value: number) => String(value).padStart(2, '0')
+
+/** 聊天式时间：今天只显示 HH:mm，昨天加“昨天”，更早显示日期 + 时间。 */
+const formatDividerTime = (
+  createdAt: number,
+  locale: Locale,
+  t: (key: TranslationKey, params?: TranslationParams) => string
+): string => {
+  const date = new Date(createdAt)
+  const time = `${pad2(date.getHours())}:${pad2(date.getMinutes())}`
+  const startOfToday = new Date().setHours(0, 0, 0, 0)
+  const startOfDay = new Date(createdAt).setHours(0, 0, 0, 0)
+  const dayDiff = Math.round((startOfToday - startOfDay) / DAY)
+  if (dayDiff <= 0) {
+    return time
+  }
+  if (dayDiff === 1) {
+    return t('messageTimeYesterday', { time })
+  }
+  const options: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' }
+  if (date.getFullYear() !== new Date().getFullYear()) {
+    options.year = 'numeric'
+  }
+  const datePart = new Intl.DateTimeFormat(locale, options).format(date)
+  return `${datePart} ${time}`
+}
 
 export const MessageList = ({
   session,
@@ -43,6 +75,8 @@ export const MessageList = ({
   footer: React.ReactNode
 }) => {
   const isMobile = useIsMobile()
+  const t = useTranslate()
+  const locale = useSettings((state) => state.locale)
   const scrollRef = useRef<HTMLDivElement>(null)
   const contentRef = useRef<HTMLDivElement>(null)
   const stickyRef = useRef(true)
@@ -146,33 +180,47 @@ export const MessageList = ({
       <div ref={isMobile ? undefined : scrollRef} className={styles.container}>
         <div ref={isMobile ? scrollRef : undefined} className={styles.scroll}>
           <div ref={contentRef} className={styles.column}>
-            {messages.map((message, index) => (
-              // 搜索跳转锚点：data-message-id 供 historySearch 按 DOM 定位与高亮。
-              <div key={message.id} data-message-id={message.id}>
-                {message.role === 'user' ? (
-                  <UserMessage
-                    sessionId={session.id}
-                    message={message}
-                    retryUploadId={uploadRetryId}
-                    isFirst={index === 0}
-                    isLast={index === lastIndex || index === lastIndex - 1}
-                    busy={streaming}
-                    versions={versions.get(message.id) ?? EMPTY_VERSIONS}
-                    onSelectVersion={selectVersion}
-                  />
-                ) : (
-                  <AssistantMessage
-                    sessionId={session.id}
-                    message={message}
-                    isLast={index === lastIndex}
-                    streaming={streaming && index === lastIndex}
-                    busy={streaming}
-                    versions={versions.get(message.id) ?? EMPTY_VERSIONS}
-                    onSelectVersion={selectVersion}
-                  />
-                )}
-              </div>
-            ))}
+            {messages.map((message, index) => {
+              const previous = messages[index - 1]
+              const showDivider =
+                index === 0 ||
+                message.createdAt - (previous?.createdAt ?? message.createdAt) >
+                  TIME_DIVIDER_GAP
+              return (
+                <Fragment key={message.id}>
+                  {showDivider ? (
+                    <div className={styles.timeDivider}>
+                      {formatDividerTime(message.createdAt, locale, t)}
+                    </div>
+                  ) : null}
+                  {/* 搜索跳转锚点：data-message-id 供 historySearch 按 DOM 定位与高亮。*/}
+                  <div data-message-id={message.id}>
+                    {message.role === 'user' ? (
+                      <UserMessage
+                        sessionId={session.id}
+                        message={message}
+                        retryUploadId={uploadRetryId}
+                        isFirst={index === 0}
+                        isLast={index === lastIndex || index === lastIndex - 1}
+                        busy={streaming}
+                        versions={versions.get(message.id) ?? EMPTY_VERSIONS}
+                        onSelectVersion={selectVersion}
+                      />
+                    ) : (
+                      <AssistantMessage
+                        sessionId={session.id}
+                        message={message}
+                        isLast={index === lastIndex}
+                        streaming={streaming && index === lastIndex}
+                        busy={streaming}
+                        versions={versions.get(message.id) ?? EMPTY_VERSIONS}
+                        onSelectVersion={selectVersion}
+                      />
+                    )}
+                  </div>
+                </Fragment>
+              )
+            })}
           </div>
         </div>
         {footer}

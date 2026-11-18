@@ -1,8 +1,15 @@
 import clsx from 'clsx'
 import { memo, useState } from 'react'
 import { useTranslate } from '../../i18n/index.js'
-import { IconEditOutline16, IconEllipsisOutline16, IconTrashOutline16 } from '../base/icons.js'
-import { renameSession, selectSession } from '../../services/chat/store.js'
+import {
+  IconArchiveOutline16,
+  IconCheckOutline16,
+  IconEditOutline16,
+  IconEllipsisOutline16,
+  IconPinOutline16,
+  IconTrashOutline16,
+} from '../base/icons.js'
+import { renameSession, selectSession, setSessionFlags } from '../../services/chat/store.js'
 import type { SessionSummary } from '../../services/chat/types.js'
 import { IconButton } from '../base/IconButton.js'
 import { Menu } from '../base/Menu.js'
@@ -13,10 +20,17 @@ export const SessionItem = memo(function SessionItem({
   session,
   active,
   onDelete,
+  selectable = false,
+  selected = false,
+  onToggleSelect,
 }: {
   session: SessionSummary
   active: boolean
   onDelete: () => void
+  /** 多选模式：行首显示复选框，点击行切换选中，菜单隐藏 */
+  selectable?: boolean
+  selected?: boolean
+  onToggleSelect?: () => void
 }) {
   const t = useTranslate()
   const [editing, setEditing] = useState(false)
@@ -51,34 +65,70 @@ export const SessionItem = memo(function SessionItem({
     <div
       className={clsx(styles.item, active && styles.active)}
       onClick={() => {
+        if (selectable) {
+          onToggleSelect?.()
+          return
+        }
         selectSession(session.id)
         closeMobileSider()
       }}
     >
-      <div className={styles.title}>{displayTitle}</div>
-      <div className={styles.action} onClick={(event) => event.stopPropagation()}>
-        <Menu
-          options={[
-            {
-              key: 'rename',
-              label: t('sessionItemMenuRenameOption'),
-              icon: <IconEditOutline16 />,
-              onSelect: () => setEditing(true),
-            },
-            {
-              key: 'delete',
-              label: t('delete'),
-              icon: <IconTrashOutline16 />,
-              danger: true,
-              onSelect: onDelete,
-            },
-          ]}
+      {selectable ? (
+        <span
+          className={clsx(styles.checkbox, selected && styles.checkboxChecked)}
+          role="checkbox"
+          aria-checked={selected}
         >
-          {({ toggle }) => (
-            <IconButton icon={<IconEllipsisOutline16 />} aria-label={t('more')} onClick={toggle} />
-          )}
-        </Menu>
-      </div>
+          {selected ? <IconCheckOutline16 /> : null}
+        </span>
+      ) : null}
+      {session.pinned ? (
+        <span className={styles.pinIcon}>
+          <IconPinOutline16 />
+        </span>
+      ) : null}
+      <div className={styles.title}>{displayTitle}</div>
+      {selectable ? null : (
+        <div className={styles.action} onClick={(event) => event.stopPropagation()}>
+          <Menu
+            options={[
+              {
+                key: 'rename',
+                label: t('sessionItemMenuRenameOption'),
+                icon: <IconEditOutline16 />,
+                onSelect: () => setEditing(true),
+              },
+              {
+                key: 'pin',
+                label: session.pinned
+                  ? t('sessionItemMenuUnpinOption')
+                  : t('sessionItemMenuPinOption'),
+                icon: <IconPinOutline16 />,
+                onSelect: () => setSessionFlags(session.id, { pinned: !session.pinned }),
+              },
+              {
+                key: 'archive',
+                label: session.archived
+                  ? t('sessionItemMenuUnarchiveOption')
+                  : t('sessionItemMenuArchiveOption'),
+                icon: <IconArchiveOutline16 />,
+                onSelect: () => setSessionFlags(session.id, { archived: !session.archived }),
+              },
+              {
+                key: 'delete',
+                label: t('delete'),
+                icon: <IconTrashOutline16 />,
+                danger: true,
+                onSelect: onDelete,
+              },
+            ]}
+          >
+            {({ toggle }) => (
+              <IconButton icon={<IconEllipsisOutline16 />} aria-label={t('more')} onClick={toggle} />
+            )}
+          </Menu>
+        </div>
+      )}
     </div>
   )
 })

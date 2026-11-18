@@ -8,6 +8,13 @@ declare const styles: {
   readonly "list": string;
   readonly "section": string;
   readonly "sectionHeader": string;
+  readonly "listToolbar": string;
+  readonly "toolbarButton": string;
+  readonly "toolbarCount": string;
+  readonly "archivedHeader": string;
+  readonly "archivedChevron": string;
+  readonly "archivedCount": string;
+  readonly "multiSelectBar": string;
   readonly "bottom": string;
   readonly "settings": string;
   readonly "settingsIcon": string;

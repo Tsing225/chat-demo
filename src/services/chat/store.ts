@@ -104,7 +104,11 @@ const getStreamController = (id: string) => {
 }
 
 const sameSummary = (a: SessionSummary, b: SessionSummary) =>
-  a.title === b.title && a.createdAt === b.createdAt && a.updatedAt === b.updatedAt
+  a.title === b.title &&
+  a.createdAt === b.createdAt &&
+  a.updatedAt === b.updatedAt &&
+  a.pinned === b.pinned &&
+  a.archived === b.archived
 
 const sessionAccess = new Map<string, number>()
 const unsavedSessions = new Set<string>()
@@ -480,11 +484,51 @@ export const renameSession = (id: string, title: string) => {
 }
 
 /**
+ * 置顶/归档：与重命名同一模式，已加载的会话走内存更新 + persist 落盘（摘要随会话一起写），
+ * 未加载的会话先乐观更新列表，再由 db.updateSessionFlags 在同一事务里更新详情和摘要。
+ * 不改 updatedAt，置顶/归档不改变会话在时间排序中的位置。
+ */
+export const setSessionFlags = (id: string, flags: { pinned?: boolean; archived?: boolean }) => {
+  if (get().importingHistory || deletingSessions.has(id)) {
+    return
+  }
+  if (getSession(id)) {
+    updateSession(id, (session) => ({ ...session, ...flags }))
+    persist(id)
+  } else {
+    set((state) => ({
+      sessions: state.sessions.map((session) =>
+        session.id === id ? { ...session, ...flags } : session
+      ),
+    }))
+    void db.updateSessionFlags(id, flags).catch(db.reportStorageError('update session flags'))
+  }
+}
+
+/**
  * 删除会话；本地原件仅在没有其他会话引用时清理。远端文件不删：导入、编辑、重新生成都会复用同一个附件，
  * 同一服务端文件可能被多个会话引用，不维护引用计数。
  */
 export const removeSession = (id: string): Promise<boolean> => {
   const task = removeSessionData(id).finally(() => deletionTasks.delete(task))
+  deletionTasks.add(task)
+  return task
+}
+
+/**
+ * 批量删除（多选模式）：逐条走与单条删除相同的 removeSessionData，
+ * 删到当前打开的会话时同样回到欢迎页；任一条失败返回 false，已删的不恢复。
+ */
+export const removeSessions = (ids: string[]): Promise<boolean> => {
+  const task = (async () => {
+    let ok = true
+    for (const id of ids) {
+      if (!(await removeSessionData(id))) {
+        ok = false
+      }
+    }
+    return ok
+  })().finally(() => deletionTasks.delete(task))
   deletionTasks.add(task)
   return task
 }

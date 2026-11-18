@@ -35,3 +35,16 @@
   margin: 0 auto;
   padding-bottom: 24px;
 }
+
+.timeDivider {
+  margin: 10px 0;
+  font-size: 12px;
+  line-height: 18px;
+  text-align: center;
+  color: var(--dsw-alias-label-tertiary);
+  user-select: none;
+
+  &:first-child {
+    margin-top: 12px;
+  }
+}

@@ -115,6 +115,10 @@ export type Session = {
   title: string
   createdAt: number
   updatedAt: number
+  /** 置顶：缺省按未置顶处理，兼容旧数据；置顶会话在侧边栏顶部单独成组。 */
+  pinned?: boolean
+  /** 归档：缺省按未归档处理，兼容旧数据；归档会话只在侧边栏底部的已归档区出现。 */
+  archived?: boolean
   /** 包含所有分支的消息，按创建顺序存储。 */
   messages: Message[]
   /** undefined 表示线性消息列表；null 表示空会话。 */
@@ -122,12 +126,17 @@ export type Session = {
 }
 
 /** 会话列表元数据；消息只在打开会话时加载。 */
-export type SessionSummary = Pick<Session, 'id' | 'title' | 'createdAt' | 'updatedAt'>
+export type SessionSummary = Pick<
+  Session,
+  'id' | 'title' | 'createdAt' | 'updatedAt' | 'pinned' | 'archived'
+>
 
-/** 显式提取字段，避免将完整会话的消息带进列表。 */
+/** 显式提取字段，避免将完整会话的消息带进列表；置顶/归档缺省时不写入该键，保持旧数据形状。 */
 export const toSessionSummary = (session: SessionSummary): SessionSummary => ({
   id: session.id,
   title: session.title,
   createdAt: session.createdAt,
   updatedAt: session.updatedAt,
+  ...(session.pinned !== undefined ? { pinned: session.pinned } : {}),
+  ...(session.archived !== undefined ? { archived: session.archived } : {}),
 })

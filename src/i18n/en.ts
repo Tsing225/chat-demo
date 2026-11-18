@@ -266,4 +266,18 @@ export const en = {
   inChatSearchNoResults: 'No matches',
   inChatSearchPrevious: 'Previous',
   inChatSearchNext: 'Next',
+  sessionItemMenuPinOption: 'Pin',
+  sessionItemMenuUnpinOption: 'Unpin',
+  sessionItemMenuArchiveOption: 'Archive',
+  sessionItemMenuUnarchiveOption: 'Unarchive',
+  pinnedSectionTitle: 'Pinned',
+  archivedSectionTitle: 'Archived',
+  multiSelect: 'Select',
+  multiSelectSelected: '{count} selected',
+  multiSelectAll: 'Select all',
+  multiSelectDeleteButton: 'Delete selected ({count})',
+  deleteSessionsModalContentTitle: 'Delete {count} chats permanently',
+  deleteSessionsWithFilesDescription:
+    'These chats and their uploaded files will be permanently deleted and cannot be recovered. Delete them?',
+  messageTimeYesterday: 'Yesterday {time}',
 } satisfies Record<keyof typeof zh, string>

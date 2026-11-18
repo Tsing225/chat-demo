@@ -534,3 +534,31 @@ export const IconCameraOutline16 = () => (
     />
   </svg>
 )
+
+/** Pin icon for the pin/unpin menu option and pinned rows: location-pin outline. */
+export const IconPinOutline16 = () => (
+  <svg width={16} height={16} viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path
+      d="M8 14.5C8 14.5 3.5 10.3 3.5 6.9A4.5 4.5 0 1 1 12.5 6.9C12.5 10.3 8 14.5 8 14.5Z"
+      stroke="currentColor"
+      strokeWidth="1.4"
+      strokeLinejoin="round"
+    />
+    <circle cx="8" cy="6.9" r="1.7" stroke="currentColor" strokeWidth="1.4" />
+  </svg>
+)
+
+/** Archive icon for the archive/unarchive menu option: box with lid and handle line. */
+export const IconArchiveOutline16 = () => (
+  <svg width={16} height={16} viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M2 4.5H14" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+    <path
+      d="M3 4.5L3.8 13.5H12.2L13 4.5"
+      stroke="currentColor"
+      strokeWidth="1.4"
+      strokeLinejoin="round"
+    />
+    <path d="M6 4.5V3H10V4.5" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
+    <path d="M6.5 8.5H9.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+  </svg>
+)
