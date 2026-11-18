@@ -3,7 +3,11 @@ import { Fragment, useEffect, useState } from 'react'
 import { useTranslate } from '../../i18n/index.js'
 import { APP_VERSION, OFFICIAL_PRICING_URL, REPO_URL } from '../../version.js'
 import { setGithubProxyPrefix, useSettings } from '../../services/settings.js'
-import { normalizeGithubProxy } from '../../services/githubProxy.js'
+import {
+  DIRECT_GITHUB_PROXY,
+  normalizeGithubProxy,
+  resolveGithubProxy,
+} from '../../services/githubProxy.js'
 import { isPeakNow, loadPrices, usePrices } from '../../services/pricing.js'
 import type { ChatModel } from '../../services/api/types.js'
 import {
@@ -84,12 +88,22 @@ const UpdateRow = () => {
   )
 }
 
-/** GitHub 加速地址：只影响 GitHub 文件下载（APK、prices.json），留空用官方地址。 */
+/** GitHub accelerator: only affects GitHub file downloads (APK, prices.json). Unset means the built-in default; saving an empty input means a direct connection (no proxy). */
 const GithubProxyField = () => {
   const t = useTranslate()
   const saved = useSettings((state) => state.githubProxyPrefix)
-  const [draft, setDraft] = useState(saved)
+  const resolved = resolveGithubProxy(saved)
+  const [draft, setDraft] = useState(resolved.mode === 'custom' ? resolved.prefix : '')
   const [error, setError] = useState(false)
+
+  // The input holds a custom prefix only; default/direct modes show an empty
+  // input, with the effective value in the status line below. Re-sync when
+  // the saved value changes (restore-default / direct buttons).
+  useEffect(() => {
+    const current = resolveGithubProxy(saved)
+    setDraft(current.mode === 'custom' ? current.prefix : '')
+    setError(false)
+  }, [saved])
 
   const save = () => {
     const normalized = normalizeGithubProxy(draft)
@@ -98,7 +112,19 @@ const GithubProxyField = () => {
       return
     }
     setError(false)
-    setGithubProxyPrefix(normalized)
+    // An empty input clears to a direct connection, stored as the 'direct'
+    // sentinel so it never falls back to the built-in default.
+    setGithubProxyPrefix(normalized === '' ? DIRECT_GITHUB_PROXY : normalized)
+    showToast({ key: 'githubProxySaved' })
+  }
+
+  const restoreDefault = () => {
+    setGithubProxyPrefix('')
+    showToast({ key: 'githubProxySaved' })
+  }
+
+  const useDirect = () => {
+    setGithubProxyPrefix(DIRECT_GITHUB_PROXY)
     showToast({ key: 'githubProxySaved' })
   }
 
@@ -128,12 +154,40 @@ const GithubProxyField = () => {
           <button
             type="button"
             className={styles.confirm}
-            // 保持输入框焦点，与 API Key 的确认按钮一致
+            // Keep the input focused, same as the API Key confirm button.
             onMouseDown={(event) => event.preventDefault()}
             onClick={save}
           >
             {t('confirm')}
           </button>
+        </div>
+        <div className={styles.description}>
+          {resolved.mode === 'direct'
+            ? t('githubProxyEffectiveDirect')
+            : t(
+                resolved.mode === 'default'
+                  ? 'githubProxyEffectiveDefault'
+                  : 'githubProxyEffectiveCustom',
+                { proxy: resolved.prefix }
+              )}
+        </div>
+        <div className={styles.proxyActions}>
+          <Button
+            variant="outlined"
+            size="s"
+            disabled={resolved.mode === 'default'}
+            onClick={restoreDefault}
+          >
+            {t('githubProxyUseDefault')}
+          </Button>
+          <Button
+            variant="outlined"
+            size="s"
+            disabled={resolved.mode === 'direct'}
+            onClick={useDirect}
+          >
+            {t('githubProxyUseDirect')}
+          </Button>
         </div>
         {error ? <div className={styles.error}>{t('githubProxyInvalid')}</div> : null}
       </div>

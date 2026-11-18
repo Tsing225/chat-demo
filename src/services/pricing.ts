@@ -3,7 +3,7 @@ import { PRICES_URL } from '../version.js'
 import type { ChatModel, MessageUsage } from './api/types.js'
 import { getVisibleMessages } from './chat/branches.js'
 import type { AssistantMessage, Session } from './chat/types.js'
-import { withGithubProxy } from './githubProxy.js'
+import { githubFileUrls } from './githubProxy.js'
 
 /** 某档价格的高峰 / 空闲价，单位：元 / 百万 tokens。 */
 export type PeakRates = { peak: number; offPeak: number }
@@ -282,8 +282,32 @@ export const parsePriceTable = (value: unknown): PriceTable | null => {
 let loading: Promise<void> | null = null
 
 /**
- * 拉取仓库里的 prices.json（走 GitHub 代理设置）；离线、超时或结构非法时静默
- * 保留内置价格。应用在 prices.json 推送之前也能正常工作（走内置价格）。
+ * Fetches and validates the online price table from one URL: null for a
+ * non-OK response or an invalid table, throws on network/timeout failure.
+ * Each attempt gets its own 10s timeout, as before.
+ */
+const fetchPriceTable = async (url: string): Promise<PriceTable | null> => {
+  const controller = new AbortController()
+  const timer = window.setTimeout(() => controller.abort(), 10_000)
+  try {
+    const response = await fetch(url, {
+      signal: controller.signal,
+      headers: { Accept: 'application/json' },
+    })
+    if (!response.ok) {
+      return null
+    }
+    return parsePriceTable(await response.json())
+  } finally {
+    window.clearTimeout(timer)
+  }
+}
+
+/**
+ * Fetches prices.json from the repo (via the GitHub proxy setting); if the
+ * proxied fetch fails, retries once via the direct URL. Offline, timeout, or
+ * an invalid table on every attempt silently keeps the bundled prices.
+ * The app also works before prices.json is pushed (bundled prices apply).
  */
 export const loadPrices = (): Promise<void> => {
   if (loading) {
@@ -291,25 +315,20 @@ export const loadPrices = (): Promise<void> => {
   }
   loading = (async () => {
     try {
-      const controller = new AbortController()
-      const timer = window.setTimeout(() => controller.abort(), 10_000)
-      try {
-        const response = await fetch(withGithubProxy(PRICES_URL), {
-          signal: controller.signal,
-          headers: { Accept: 'application/json' },
-        })
-        if (!response.ok) {
-          return
+      for (const url of githubFileUrls(PRICES_URL)) {
+        try {
+          const table = await fetchPriceTable(url)
+          if (table) {
+            usePrices.setState({ table, source: 'online' })
+            return
+          }
+        } catch {
+          // Try the next URL (the direct fallback); every attempt failing
+          // silently keeps the bundled prices.
         }
-        const table = parsePriceTable(await response.json())
-        if (table) {
-          usePrices.setState({ table, source: 'online' })
-        }
-      } finally {
-        window.clearTimeout(timer)
       }
     } catch {
-      // 静默失败：内置价格继续生效。
+      // Silent failure: bundled prices stay in effect.
     }
   })().finally(() => {
     loading = null

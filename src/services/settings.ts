@@ -18,7 +18,7 @@ type Settings = {
   thinking: boolean
   search: boolean
   siderCollapsed: boolean
-  /** GitHub 文件下载加速前缀；空字符串表示使用官方地址。 */
+  /** GitHub file-download accelerator: empty (unset) = built-in default, 'direct' = no proxy, https:// URL = custom prefix. See resolveGithubProxy in githubProxy.ts. */
   githubProxyPrefix: string
   /** 推理强度（output_config.effort），默认 high（与服务端默认一致）。 */
   reasoningEffort: ReasoningEffort

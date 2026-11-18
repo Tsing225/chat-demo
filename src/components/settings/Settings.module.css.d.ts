@@ -27,6 +27,7 @@ declare const styles: {
   readonly "apiKeyMask": string;
   readonly "divider": string;
   readonly "confirm": string;
+  readonly "proxyActions": string;
   readonly "cellButton": string;
   readonly "mobileConfirm": string;
   readonly "importConfirm": string;

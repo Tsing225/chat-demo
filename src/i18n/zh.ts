@@ -176,6 +176,8 @@ export const zh = {
   updateNow: '立即更新',
   updateLater: '以后再说',
   updateDownloading: '正在下载安装包…',
+  updateRetryingDirect:
+    '\u52a0\u901f\u4e0b\u8f7d\u5931\u8d25\uff0c\u6b63\u5728\u6539\u7528\u5b98\u65b9\u5730\u5740\u91cd\u8bd5\u2026',
   updateBytesDownloaded: '已下载 {downloaded} / {total}',
   updateDownloadedBytes: '已下载 {downloaded}',
   updateUnknownSourcesTitle: '需要允许安装应用',
@@ -199,10 +201,18 @@ export const zh = {
   currentVersion: '当前版本',
   settingDialogAsideAboutOptionLabel: '关于',
   githubProxyLabel: 'GitHub 加速地址',
-  githubProxyDescription: '用于加速 GitHub 文件下载，留空使用官方地址',
-  githubProxyPlaceholder: '例如 https://cdn.gh-proxy.org',
+  githubProxyDescription:
+    '\u5185\u7f6e\u52a0\u901f\u5730\u5740\u53ef\u52a0\u5feb GitHub \u6587\u4ef6\u4e0b\u8f7d\uff1b\u4e0b\u8f7d\u5931\u8d25\u65f6\u4f1a\u81ea\u52a8\u6539\u7528\u5b98\u65b9\u5730\u5740\u91cd\u8bd5\u4e00\u6b21\u3002',
+  githubProxyPlaceholder: '\u4f8b\u5982 https://gh-proxy.com',
   githubProxyInvalid: '加速地址须以 https:// 开头',
   githubProxySaved: '已保存',
+  githubProxyEffectiveDefault:
+    '\u5f53\u524d\u751f\u6548\uff1a{proxy}\uff08\u5185\u7f6e\u9ed8\u8ba4\uff09',
+  githubProxyEffectiveCustom: '\u5f53\u524d\u751f\u6548\uff1a{proxy}',
+  githubProxyEffectiveDirect:
+    '\u5f53\u524d\u751f\u6548\uff1a\u5b98\u65b9\u76f4\u8fde\uff08\u672a\u4f7f\u7528\u52a0\u901f\uff09',
+  githubProxyUseDefault: '\u6062\u590d\u5185\u7f6e\u9ed8\u8ba4',
+  githubProxyUseDirect: '\u5b98\u65b9\u76f4\u8fde',
   priceTableTitle: 'API 价格（每百万 tokens，人民币）',
   priceSourceOnline: '在线价格 · 更新于 {date}',
   priceSourceBundled: '内置价格 · {date}',

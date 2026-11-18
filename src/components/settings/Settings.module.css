@@ -510,3 +510,10 @@
     color: #32d583;
   }
 }
+
+.proxyActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}

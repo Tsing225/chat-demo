@@ -8,8 +8,9 @@ import {
   isApkInstallerAvailable,
   isShaMismatchError,
   type ApkDownloadProgress,
+  type ApkDownloadResult,
 } from '../../services/apkInstaller.js'
-import { withGithubProxy } from '../../services/githubProxy.js'
+import { githubFileUrls } from '../../services/githubProxy.js'
 import {
   checkForUpdate,
   closeUpdateDialog,
@@ -56,6 +57,7 @@ const UpdateDialog = ({ release }: { release: AvailableRelease }) => {
   const [downloadedPath, setDownloadedPath] = useState<string | null>(null)
   const [installerAvailable, setInstallerAvailable] = useState<boolean | null>(null)
   const [settingsOpenFailed, setSettingsOpenFailed] = useState(false)
+  const [fellBack, setFellBack] = useState(false)
   // Refs mirror phase/path for the resume listener (mounted once, needs latest values).
   const phaseRef = useRef<Phase>('prompt')
   const downloadedPathRef = useRef<string | null>(null)
@@ -166,15 +168,40 @@ const UpdateDialog = ({ release }: { release: AvailableRelease }) => {
     setProgress(null)
     setErrorKind(null)
     setSettingsOpenFailed(false)
+    setFellBack(false)
     autoJumpDoneRef.current = false
     const handle = await ApkInstaller.addListener('downloadProgress', (update) => {
       setProgress(update)
     })
     try {
-      const result = await ApkInstaller.downloadApk({
-        url: withGithubProxy(release.apkUrl),
-        ...(release.sha256 ? { expectedSha256: release.sha256 } : {}),
-      })
+      // Attempt order: proxied URL first, then the direct URL exactly once.
+      // A SHA256 mismatch on the proxied file is treated like any other
+      // download failure: the plugin deletes the bad file, the direct URL is
+      // tried once with the same SHA check, and nothing mismatched is ever
+      // installed. Direct mode yields a single URL, so there is no retry.
+      const urls = githubFileUrls(release.apkUrl)
+      const downloadOnce = (url: string) =>
+        ApkInstaller.downloadApk({
+          url,
+          ...(release.sha256 ? { expectedSha256: release.sha256 } : {}),
+        })
+      let result: ApkDownloadResult | null = null
+      let lastError: unknown = null
+      for (const [index, url] of urls.entries()) {
+        try {
+          result = await downloadOnce(url)
+          break
+        } catch (error) {
+          lastError = error
+          if (index < urls.length - 1) {
+            setFellBack(true)
+            setProgress(null)
+          }
+        }
+      }
+      if (!result) {
+        throw lastError
+      }
       setDownloadedPath(result.path)
       await installDownloaded(result.path, true)
     } catch (error) {
@@ -270,7 +297,7 @@ const UpdateDialog = ({ release }: { release: AvailableRelease }) => {
         </div>
       ) : phase === 'downloading' ? (
         <div className={styles.body}>
-          <div>{t('updateDownloading')}</div>
+          <div>{t(fellBack ? 'updateRetryingDirect' : 'updateDownloading')}</div>
           <div
             className={styles.progressTrack}
             role="progressbar"
