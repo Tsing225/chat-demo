@@ -1,3 +1,4 @@
+import { Capacitor } from '@capacitor/core'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { TranslationMessage } from '../../i18n/index.js'
 import { transcribe } from '../../services/api/speech.js'
@@ -16,6 +17,9 @@ const AVAILABLE = typeof window === 'undefined' || window.isSecureContext
 const describeRecordingError = (error: unknown): TranslationMessage => {
   if (error instanceof DOMException) {
     if (error.name === 'NotAllowedError' || error.name === 'SecurityError') {
+      if (Capacitor.isNativePlatform()) {
+        return { key: 'voiceInputPermissionDeniedApp' }
+      }
       return { key: 'voiceInputPermissionDenied' }
     }
     if (error.name === 'NotFoundError') {
