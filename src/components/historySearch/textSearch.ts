@@ -127,8 +127,8 @@ export type GlobalSearchResult = MessageHit & {
 }
 
 /**
- * 在全部会话里搜索：会话按更新时间倒序，会话内消息按时间倒序（先看到最近的内容），
- * 结果截断到 MAX_GLOBAL_RESULTS 条。
+ * 在全部会话里搜索：未归档会话在前、已归档会话在后，各组内按更新时间倒序，
+ * 会话内消息按时间倒序（先看到最近的内容），结果截断到 MAX_GLOBAL_RESULTS 条。
  */
 export const searchAllSessions = (sessions: Session[], query: string): GlobalSearchResult[] => {
   const needle = query.trim()
@@ -136,7 +136,10 @@ export const searchAllSessions = (sessions: Session[], query: string): GlobalSea
     return []
   }
   const results: GlobalSearchResult[] = []
-  const ordered = [...sessions].sort((a, b) => b.updatedAt - a.updatedAt)
+  const ordered = [...sessions].sort(
+    (a, b) =>
+      Number(a.archived ?? false) - Number(b.archived ?? false) || b.updatedAt - a.updatedAt,
+  )
   for (const session of ordered) {
     const messages = [...session.messages].sort((a, b) => b.createdAt - a.createdAt)
     for (const hit of searchMessages(messages, needle)) {
