@@ -14,7 +14,7 @@ export const en = {
     'Chats or attachments have not been saved locally. Retry before closing this page.',
   sessionDeleteFailed: 'Unable to delete this chat. Please try again.',
   settings: 'Settings',
-  appName: 'API usage demo',
+  appName: 'deepseek for chat',
   deleteSessionModalContentTitle: 'Delete chat?',
   deleteSessionWithFilesDescription:
     'This chat and its uploaded files will be permanently deleted and cannot be recovered. Delete this chat?',
@@ -144,6 +144,7 @@ export const en = {
   deactivatedSearchTooltip: 'Search the web when necessary',
   search: 'Search',
   uploadFile: 'Upload files',
+  takePhoto: 'Take photo',
   chatInputStopButtonTooltip: 'Stop',
   uploadMaxMBSize: 'File exceeds the size limit ({size} MB). Please adjust and try again.',
   uploadMaxFiles: 'You can upload up to {count} files',
@@ -161,6 +162,8 @@ export const en = {
   voiceInputCancel: 'Transcribing. Click to cancel',
   voiceInputPermissionDenied:
     'Microphone access is blocked. Please allow it in your browser settings.',
+  voiceInputPermissionDeniedApp:
+    'Microphone access is blocked. Please allow microphone access for this app in your system settings.',
   voiceInputNoDevice: 'No microphone detected',
   voiceInputTooLong: 'Recording is too long. Please shorten it and try again.',
   voiceInputFailed: 'Speech recognition failed. Please try again later.',
