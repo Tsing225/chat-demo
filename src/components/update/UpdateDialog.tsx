@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslate } from '../../i18n/index.js'
 import { Button } from '../base/Button.js'
 import { Modal } from '../base/Modal.js'
+import { showToast } from '../base/toastState.js'
 import {
   ApkInstaller,
   isApkInstallerAvailable,
@@ -54,6 +55,14 @@ const UpdateDialog = ({ release }: { release: AvailableRelease }) => {
   const [errorKind, setErrorKind] = useState<ErrorKind | null>(null)
   const [downloadedPath, setDownloadedPath] = useState<string | null>(null)
   const [installerAvailable, setInstallerAvailable] = useState<boolean | null>(null)
+  const [settingsOpenFailed, setSettingsOpenFailed] = useState(false)
+  // Refs mirror phase/path for the resume listener (mounted once, needs latest values).
+  const phaseRef = useRef<Phase>('prompt')
+  const downloadedPathRef = useRef<string | null>(null)
+  // At most one automatic settings jump per explicit install attempt; resume never jumps.
+  const autoJumpDoneRef = useRef(false)
+  // Guards concurrent install attempts (retry tap racing the resume check).
+  const installInFlightRef = useRef(false)
 
   useEffect(() => {
     let cancelled = false
@@ -67,15 +76,79 @@ const UpdateDialog = ({ release }: { release: AvailableRelease }) => {
     }
   }, [])
 
+  useEffect(() => {
+    phaseRef.current = phase
+  }, [phase])
+
+  useEffect(() => {
+    downloadedPathRef.current = downloadedPath
+  }, [downloadedPath])
+
+  // Returning from system settings: if the permission is now granted, install
+  // automatically; if still blocked, stay on the permission screen for a manual
+  // retry. This path never opens settings itself, so it cannot loop.
+  // No @capacitor/app dependency: visibilitychange + focus cover the WebView
+  // being backgrounded by the settings activity.
+  useEffect(() => {
+    const checkOnReturn = async () => {
+      const path = downloadedPathRef.current
+      if (phaseRef.current !== 'permission' || installInFlightRef.current || !path) {
+        return
+      }
+      installInFlightRef.current = true
+      try {
+        const { canInstall } = await ApkInstaller.canInstall()
+        if (!canInstall) {
+          return
+        }
+        setPhase('installing')
+        await ApkInstaller.installApk({ path })
+      } catch {
+        setErrorKind('install')
+        setPhase('error')
+      } finally {
+        installInFlightRef.current = false
+      }
+    }
+    const onVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        void checkOnReturn()
+      }
+    }
+    const onFocus = () => {
+      void checkOnReturn()
+    }
+    document.addEventListener('visibilitychange', onVisibilityChange)
+    window.addEventListener('focus', onFocus)
+    return () => {
+      document.removeEventListener('visibilitychange', onVisibilityChange)
+      window.removeEventListener('focus', onFocus)
+    }
+  }, [])
+
   const openInBrowser = () => {
     window.open(release.htmlUrl, '_blank', 'noopener,noreferrer')
   }
 
-  const installDownloaded = async (path: string) => {
+  const installDownloaded = async (path: string, autoJump: boolean) => {
+    if (installInFlightRef.current) {
+      return
+    }
+    installInFlightRef.current = true
     try {
       const { canInstall } = await ApkInstaller.canInstall()
       if (!canInstall) {
+        setSettingsOpenFailed(false)
         setPhase('permission')
+        if (autoJump && !autoJumpDoneRef.current) {
+          autoJumpDoneRef.current = true
+          showToast({ key: 'updateJumpingToSettings' })
+          try {
+            await ApkInstaller.openUnknownSourcesSettings()
+          } catch {
+            setSettingsOpenFailed(true)
+          }
+        }
         return
       }
       setPhase('installing')
@@ -83,6 +156,8 @@ const UpdateDialog = ({ release }: { release: AvailableRelease }) => {
     } catch {
       setErrorKind('install')
       setPhase('error')
+    } finally {
+      installInFlightRef.current = false
     }
   }
 
@@ -90,6 +165,8 @@ const UpdateDialog = ({ release }: { release: AvailableRelease }) => {
     setPhase('downloading')
     setProgress(null)
     setErrorKind(null)
+    setSettingsOpenFailed(false)
+    autoJumpDoneRef.current = false
     const handle = await ApkInstaller.addListener('downloadProgress', (update) => {
       setProgress(update)
     })
@@ -99,7 +176,7 @@ const UpdateDialog = ({ release }: { release: AvailableRelease }) => {
         ...(release.sha256 ? { expectedSha256: release.sha256 } : {}),
       })
       setDownloadedPath(result.path)
-      await installDownloaded(result.path)
+      await installDownloaded(result.path, true)
     } catch (error) {
       setErrorKind(isShaMismatchError(error) ? 'hash' : 'download')
       setPhase('error')
@@ -108,17 +185,10 @@ const UpdateDialog = ({ release }: { release: AvailableRelease }) => {
     }
   }
 
-  const openUnknownSources = async () => {
-    try {
-      await ApkInstaller.openUnknownSourcesSettings()
-    } catch {
-      // 打开系统设置失败时留在当前界面，用户可改走浏览器兜底。
-    }
-  }
-
   const retry = () => {
     if (errorKind === 'install' && downloadedPath) {
-      void installDownloaded(downloadedPath)
+      autoJumpDoneRef.current = false
+      void installDownloaded(downloadedPath, true)
     } else {
       void startDownload()
     }
@@ -163,19 +233,18 @@ const UpdateDialog = ({ release }: { release: AvailableRelease }) => {
               {t('updateOpenInBrowser')}
             </Button>
             <Button
-              variant="outlined"
+              variant="primary"
               size="m"
               disabled={!downloadedPath}
               onClick={() => {
                 if (downloadedPath) {
-                  void installDownloaded(downloadedPath)
+                  // Explicit retry: a fresh attempt may jump to settings once more.
+                  autoJumpDoneRef.current = false
+                  void installDownloaded(downloadedPath, true)
                 }
               }}
             >
               {t('updateInstall')}
-            </Button>
-            <Button variant="primary" size="m" onClick={() => void openUnknownSources()}>
-              {t('updateOpenSettings')}
             </Button>
           </div>
         ) : phase === 'installing' ? (
@@ -240,7 +309,9 @@ const UpdateDialog = ({ release }: { release: AvailableRelease }) => {
           </div>
         </div>
       ) : phase === 'permission' ? (
-        <div className={styles.body}>{t('updateUnknownSourcesBody')}</div>
+        <div className={styles.body}>
+          {t(settingsOpenFailed ? 'updateSettingsOpenFailed' : 'updateUnknownSourcesBody')}
+        </div>
       ) : phase === 'installing' ? (
         <div className={styles.body}>{t('updateInstalling')}</div>
       ) : (

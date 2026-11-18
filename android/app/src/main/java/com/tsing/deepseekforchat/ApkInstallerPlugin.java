@@ -168,12 +168,19 @@ public class ApkInstallerPlugin extends Plugin {
     @PluginMethod
     public void openUnknownSourcesSettings(PluginCall call) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            Intent intent =
-                    new Intent(
-                            Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
-                            Uri.parse("package:" + getContext().getPackageName()));
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            getContext().startActivity(intent);
+            try {
+                Intent intent =
+                        new Intent(
+                                Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
+                                Uri.parse("package:" + getContext().getPackageName()));
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                getContext().startActivity(intent);
+            } catch (Exception e) {
+                // No activity handles the intent (heavily customized ROM):
+                // reject so the web side shows manual guidance.
+                call.reject("SETTINGS_OPEN_FAILED", e);
+                return;
+            }
         }
         call.resolve();
     }

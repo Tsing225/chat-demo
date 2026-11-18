@@ -191,6 +191,9 @@ export const en = {
   updateUnknownSourcesTitle: 'Permission needed to install apps',
   updateUnknownSourcesBody:
     'Android requires allowing this app to install apps from unknown sources. Enable it in system settings, then come back here and tap Install to retry.',
+  updateJumpingToSettings: 'Opening system settings. Allow installation, then return here.',
+  updateSettingsOpenFailed:
+    'Could not open system settings. Manually open Settings > Apps > this app > Install unknown apps, allow it, then return here and tap Install.',
   updateOpenSettings: 'Open settings',
   updateInstall: 'Install',
   updateOpenInBrowser: 'Open in browser',

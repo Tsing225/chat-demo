@@ -181,6 +181,9 @@ export const zh = {
   updateUnknownSourcesTitle: '需要允许安装应用',
   updateUnknownSourcesBody:
     'Android 要求允许本应用安装未知来源的应用。请在系统设置中开启该权限后，返回这里点“安装”重试。',
+  updateJumpingToSettings: '正在跳转到系统设置，请允许安装后返回',
+  updateSettingsOpenFailed:
+    '无法打开系统设置，请手动打开“设置 > 应用 > 本应用 > 安装未知应用”并允许，然后返回这里点“安装”。',
   updateOpenSettings: '去设置',
   updateInstall: '安装',
   updateOpenInBrowser: '在浏览器中打开',
