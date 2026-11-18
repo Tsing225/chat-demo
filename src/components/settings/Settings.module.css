@@ -440,3 +440,73 @@
     max-width: 100%;
   }
 }
+
+.aboutBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.aboutText {
+  margin: 0;
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--dsw-alias-label-secondary);
+  overflow-wrap: anywhere;
+}
+
+.aboutLink {
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--dsw-alias-brand-text);
+  overflow-wrap: anywhere;
+}
+
+.priceTableWrap {
+  overflow-x: auto;
+}
+
+.priceTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  line-height: 20px;
+  white-space: nowrap;
+}
+
+.priceTable th,
+.priceTable td {
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--dsw-alias-border-l2-darkmode-thin);
+  text-align: left;
+  font-weight: 400;
+}
+
+.priceTable th {
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.priceTable td:first-child {
+  font-weight: 500;
+}
+
+/* 峰时红 / 谷时绿：颜色只起强化作用，文字标签始终保留；深色主题用更亮的同色。 */
+.pricePeak {
+  color: #d92d20;
+  font-weight: 600;
+
+  [data-ds-dark-theme] & {
+    color: #f97066;
+  }
+}
+
+.priceOffPeak {
+  color: #067647;
+  font-weight: 600;
+
+  [data-ds-dark-theme] & {
+    color: #32d583;
+  }
+}

@@ -33,6 +33,13 @@ declare const styles: {
   readonly "importConfirmText": string;
   readonly "deleteConfirm": string;
   readonly "deleteActions": string;
+  readonly "aboutBlock": string;
+  readonly "aboutText": string;
+  readonly "aboutLink": string;
+  readonly "priceTableWrap": string;
+  readonly "priceTable": string;
+  readonly "pricePeak": string;
+  readonly "priceOffPeak": string;
 };
 export = styles;
 

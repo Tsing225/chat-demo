@@ -6,6 +6,7 @@ import {
   IconDownloadOutline16,
   IconFollowsystemOutline16,
   IconLightOutline16,
+  IconLinkOutline16,
   IconSettingsOutline16,
   IconUploadOutline14,
 } from '../base/icons.js'
@@ -33,11 +34,12 @@ import { Modal } from '../base/Modal.js'
 import { Select } from '../base/Select.js'
 import { showToast } from '../base/toastState.js'
 import { ApiKeyConfirm, ApiKeyField, useApiKeyEditor } from './ApiKeyField.js'
+import { AboutSection } from './AboutSection.js'
 import { closeSettings, useSettingsDialog, type SettingsSection } from './settingsDialogState.js'
 import styles from './Settings.module.css'
 
 /**
- * 设置弹窗：分「通用设置」（主题、语言、朗读音色、位置）与「数据管理」（API Key、导入、导出、删除）。
+ * 设置弹窗：分「通用设置」（主题、语言、朗读音色、位置）、「数据管理」（API Key、导入、导出、删除）与「关于」（版本、更新、价格、致谢与联系）。
  * 桌面端为居中弹窗、左侧导航；移动端为底部弹层、导航横排在内容上方
  */
 export const SettingsDialog = () => {
@@ -52,6 +54,11 @@ const sections: { value: SettingsSection; label: TranslationKey; icon: ReactNode
     icon: <IconSettingsOutline16 />,
   },
   { value: 'data', label: 'settingDialogAsideDataOptionLabel', icon: <IconDataOutline16 /> },
+  {
+    value: 'about',
+    label: 'settingDialogAsideAboutOptionLabel',
+    icon: <IconLinkOutline16 />,
+  },
 ]
 
 const SettingsContent = () => {
@@ -101,7 +108,7 @@ const SettingsContent = () => {
               <TtsVoiceSetting />
               <LocationSetting />
             </>
-          ) : (
+          ) : section === 'data' ? (
             <>
               <ApiKeyField editor={apiKeyEditor} />
               <ImportHistory historyImport={historyImport} disabled={historyBusy} />
@@ -123,6 +130,8 @@ const SettingsContent = () => {
               />
               {isMobile ? <ApiKeyConfirm editor={apiKeyEditor} /> : null}
             </>
+          ) : (
+            <AboutSection />
           )}
         </div>
       </Modal>
