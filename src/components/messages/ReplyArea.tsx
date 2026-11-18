@@ -1,6 +1,6 @@
 import { useTranslate } from '../../i18n/index.js'
 import clsx from 'clsx'
-import { memo, useEffect, useState, type ReactNode } from 'react'
+import { memo, useEffect, useRef, useState, type ReactNode } from 'react'
 import {
   IconBrowseOutline16,
   IconBrowseWarningOutline16,
@@ -65,7 +65,18 @@ export const ReplyArea = memo(function ReplyArea({
   hasResponse: boolean
 }) {
   useTranslate()
-  const [open, setOpen] = useState(true)
+  // Settled replies start collapsed; the live reply stays open while streaming.
+  // A streaming transition opens/closes exactly once per run; manual toggles
+  // between transitions are left alone.
+  const [open, setOpen] = useState(streaming)
+  const prevStreamingRef = useRef(streaming)
+  useEffect(() => {
+    if (prevStreamingRef.current === streaming) {
+      return
+    }
+    prevStreamingRef.current = streaming
+    setOpen(streaming)
+  }, [streaming])
   const titleActive = streaming && !hasResponse
   useTicker(titleActive, 1000)
   if (view.steps.length === 0 && !(message.thinking && streaming)) {
