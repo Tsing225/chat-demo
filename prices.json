@@ -45,5 +45,5 @@
   "peakHours": "Beijing Mon-Fri 09:00-12:00 and 14:00-18:00, excluding Chinese public holidays; off-peak is half of peak on all lines.",
   "schemaVersion": 1,
   "unit": "per 1M tokens",
-  "webSearchPerRequest": 0.005
+  "webSearchPerRequest": 0
 }

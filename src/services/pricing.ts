@@ -19,7 +19,7 @@ export type PriceTable = {
   schemaVersion: number
   effectiveDate: string
   contextWindow: number
-  /** 每次联网搜索 / 抓取的价格，单位：元。 */
+  /** 每次联网搜索 / 抓取的价格，单位：元；0 表示免费。 */
   webSearchPerRequest: number
   models: Record<ChatModel, ModelPrices>
 }
@@ -30,12 +30,13 @@ export type PriceTable = {
  * 缓存命中 / 缓存未命中 / 输出三档，且缓存为自动机制、无单独写入费用；因此写
  * 入 token 按缓存未命中价计（首次计算的输入本就按全价计，之后命中才享低价）。
  * 在线 prices.json 与内置表结构相同，改价只需更新仓库根目录的 prices.json。
+ * 服务端联网搜索自 2026-11-18 12:00（北京时间）起免费（官方价格页公告），故 webSearchPerRequest 为 0。
  */
 export const BUNDLED_PRICES: PriceTable = {
   schemaVersion: 1,
   effectiveDate: '2026-11-18',
   contextWindow: 1_000_000,
-  webSearchPerRequest: 0.005,
+  webSearchPerRequest: 0,
   models: {
     'deepseek-flash': {
       inputCacheMiss: { offPeak: 1, peak: 2 },
@@ -97,7 +98,7 @@ const rate = (rates: PeakRates, peak: boolean): number => (peak ? rates.peak : r
 /**
  * 按一次请求的用量计费（单位：元）。output_tokens 已包含思考 token，思考按输出价计，
  * 因此推理强度不改变计费公式，只改变实际产生的 token 数。
- * 联网搜索按 usage.server_tool_use.web_search_requests 计数，每次 0.005 元。
+ * 联网搜索按 usage.server_tool_use.web_search_requests 计数；自 2026-11-18 12:00 起官方不再计费，单价为 0。
  */
 export const computeCost = (
   usage: MessageUsage,
