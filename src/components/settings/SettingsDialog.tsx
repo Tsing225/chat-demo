@@ -21,13 +21,17 @@ import { useChatStore } from '../../services/chat/store.js'
 import { regionCodes, getRegionName, provinces } from '../../services/location.js'
 import {
   isChineseBrowser,
+  setFollowSystemFontSize,
+  setFontSize,
   setLocale,
   setLocation,
   setThemePreference,
   setTtsVoice,
   useSettings,
+  type FontSizeLevel,
   type ThemePreference,
 } from '../../services/settings.js'
+import { FONT_SIZE_LEVELS } from '../../services/fontScale.js'
 import { useTranslate, type TranslationKey, type TranslationMessage } from '../../i18n/index.js'
 import { Button } from '../base/Button.js'
 import { Modal } from '../base/Modal.js'
@@ -104,6 +108,7 @@ const SettingsContent = () => {
           {section === 'general' ? (
             <>
               <ThemeSetting />
+              <FontSizeSetting />
               <LocaleSetting />
               <TtsVoiceSetting />
               <LocationSetting />
@@ -396,6 +401,156 @@ const ThemeSetting = () => {
             {option.icon}
             {t(option.label)}
           </button>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+const FONT_SIZE_LABEL_KEYS: Record<FontSizeLevel, TranslationKey> = {
+  small: 'settingsFontSizeSmall',
+  standard: 'settingsFontSizeStandard',
+  large: 'settingsFontSizeLarge',
+  xlarge: 'settingsFontSizeXLarge',
+}
+
+/** 字体大小：跟随系统开关 + 四档滑块；跟随系统开启时滑块禁用，改动立即生效并持久化。 */
+const FontSizeSetting = () => {
+  const t = useTranslate()
+  const followSystemFontSize = useSettings((state) => state.followSystemFontSize)
+  return (
+    <div className={styles.fontSize}>
+      <div className={styles.fontSizeHeader}>
+        <div className={styles.text}>
+          <div className={styles.label}>{t('settingsFontSize')}</div>
+          <div className={styles.description}>{t('settingsFontSizeFollowSystemDescription')}</div>
+        </div>
+        <div className={styles.fontSizeToggle}>
+          <span>{t('settingsFontSizeFollowSystem')}</span>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={followSystemFontSize}
+            aria-label={t('settingsFontSizeFollowSystem')}
+            className={clsx(styles.fontSwitch, followSystemFontSize && styles.fontSwitchOn)}
+            onClick={() => setFollowSystemFontSize(!followSystemFontSize)}
+          >
+            <span className={styles.fontSwitchKnob} />
+          </button>
+        </div>
+      </div>
+      <FontSizeSlider disabled={followSystemFontSize} />
+    </div>
+  )
+}
+
+const clampFontIndex = (value: number): number => Math.min(3, Math.max(0, value))
+
+/**
+ * 字体大小滑块：与推理强度滑块同模式，拖动时旋钮跟随手指，松手后吸附到最近档位；
+ * 点按轨道任意位置也会选中最近档位，方向键可逐档调节。禁用时不响应操作。
+ */
+const FontSizeSlider = ({ disabled }: { disabled: boolean }) => {
+  const t = useTranslate()
+  const fontSize = useSettings((state) => state.fontSize)
+  const trackRef = useRef<HTMLDivElement>(null)
+  // 拖动中的连续位置（0-3）；null 表示未拖动，显示已提交的档位。
+  const [dragValue, setDragValue] = useState<number | null>(null)
+
+  const committedIndex = FONT_SIZE_LEVELS.indexOf(fontSize)
+  const displayValue = dragValue ?? committedIndex
+  const displayIndex = Math.round(clampFontIndex(displayValue))
+  const displayLevel = FONT_SIZE_LEVELS[displayIndex]
+
+  const valueFromClientX = (clientX: number): number => {
+    const rect = trackRef.current?.getBoundingClientRect()
+    if (!rect || rect.width === 0) {
+      return committedIndex
+    }
+    return clampFontIndex(((clientX - rect.left) / rect.width) * 3)
+  }
+
+  const commit = (value: number) => {
+    setFontSize(FONT_SIZE_LEVELS[Math.round(clampFontIndex(value))])
+  }
+
+  return (
+    <div className={styles.fontSlider} data-disabled={disabled}>
+      <div
+        ref={trackRef}
+        className={styles.fontTrack}
+        role="slider"
+        tabIndex={disabled ? -1 : 0}
+        aria-label={t('settingsFontSize')}
+        aria-valuemin={0}
+        aria-valuemax={3}
+        aria-valuenow={displayIndex}
+        aria-valuetext={t(FONT_SIZE_LABEL_KEYS[displayLevel])}
+        aria-disabled={disabled}
+        onPointerDown={(event) => {
+          if (disabled) {
+            return
+          }
+          event.currentTarget.setPointerCapture(event.pointerId)
+          setDragValue(valueFromClientX(event.clientX))
+        }}
+        onPointerMove={(event) => {
+          if (disabled || dragValue === null) {
+            return
+          }
+          setDragValue(valueFromClientX(event.clientX))
+        }}
+        onPointerUp={() => {
+          if (disabled || dragValue === null) {
+            return
+          }
+          commit(dragValue)
+          setDragValue(null)
+        }}
+        onPointerCancel={() => {
+          if (dragValue !== null) {
+            setDragValue(null)
+          }
+        }}
+        onKeyDown={(event) => {
+          if (disabled) {
+            return
+          }
+          if (event.key === 'ArrowRight' || event.key === 'ArrowUp') {
+            event.preventDefault()
+            commit(committedIndex + 1)
+          } else if (event.key === 'ArrowLeft' || event.key === 'ArrowDown') {
+            event.preventDefault()
+            commit(committedIndex - 1)
+          } else if (event.key === 'Home') {
+            event.preventDefault()
+            commit(0)
+          } else if (event.key === 'End') {
+            event.preventDefault()
+            commit(3)
+          }
+        }}
+      >
+        <div className={styles.fontRail} />
+        <div className={styles.fontFill} style={{ width: `${(displayValue / 3) * 100}%` }} />
+        {FONT_SIZE_LEVELS.map((level, index) => (
+          <span
+            key={level}
+            aria-hidden
+            className={styles.fontTick}
+            style={{ left: `${(index / 3) * 100}%` }}
+          />
+        ))}
+        <div className={styles.fontKnob} style={{ left: `${(displayValue / 3) * 100}%` }} />
+      </div>
+      <div className={styles.fontTickLabels} aria-hidden>
+        {FONT_SIZE_LEVELS.map((level, index) => (
+          <span
+            key={level}
+            className={index === displayIndex ? styles.fontTickLabelActive : undefined}
+          >
+            {t(FONT_SIZE_LABEL_KEYS[level])}
+          </span>
         ))}
       </div>
     </div>

@@ -517,3 +517,152 @@
   gap: 8px;
   margin-top: 8px;
 }
+
+/* 字体大小：标题行 + 跟随系统开关 + 四档滑块。 */
+.fontSize {
+  flex-shrink: 0;
+  padding: 4px 0 12px;
+}
+
+.fontSizeHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.fontSizeHeader .text {
+  padding-right: 8px;
+}
+
+.fontSizeToggle {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  line-height: 22px;
+  color: var(--dsw-alias-label-primary);
+  white-space: nowrap;
+}
+
+.fontSwitch {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  border-radius: 100px;
+  background-color: var(--dsw-alias-interactive-bg-hover-accent);
+  cursor: pointer;
+  outline: none;
+  transition: background-color var(--ds-transition-duration) var(--ds-ease-in-out);
+
+  &:focus-visible {
+    box-shadow: 0 0 0 2px var(--dsw-alias-button-primary-fill);
+  }
+}
+
+.fontSwitchOn {
+  background-color: var(--dsw-alias-brand-primary);
+}
+
+.fontSwitchKnob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: var(--dsw-static-neutral-bluish-00);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  transition: left var(--ds-transition-duration) var(--ds-ease-in-out);
+}
+
+.fontSwitchOn .fontSwitchKnob {
+  left: 22px;
+}
+
+.fontSlider {
+  margin-top: 14px;
+  padding: 0 10px;
+
+  &[data-disabled='true'] {
+    opacity: 0.45;
+  }
+}
+
+.fontTrack {
+  position: relative;
+  height: 28px;
+  outline: none;
+  touch-action: none;
+  cursor: pointer;
+
+  .fontSlider[data-disabled='true'] & {
+    cursor: default;
+  }
+
+  &:focus-visible {
+    box-shadow: 0 0 0 2px var(--dsw-alias-button-primary-fill);
+    border-radius: 8px;
+  }
+}
+
+.fontRail {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  left: 0;
+  height: 4px;
+  border-radius: 2px;
+  background-color: var(--dsw-alias-interactive-bg-hover-accent);
+  transform: translateY(-50%);
+}
+
+.fontFill {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  height: 4px;
+  border-radius: 2px;
+  background-color: var(--dsw-alias-brand-primary);
+  transform: translateY(-50%);
+}
+
+.fontTick {
+  position: absolute;
+  top: 50%;
+  box-sizing: border-box;
+  width: 8px;
+  height: 8px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 50%;
+  background-color: var(--dsw-alias-bg-base);
+  transform: translate(-50%, -50%);
+}
+
+.fontKnob {
+  position: absolute;
+  top: 50%;
+  width: 20px;
+  height: 20px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 50%;
+  background-color: var(--dsw-alias-bg-layer-3);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+  transform: translate(-50%, -50%);
+}
+
+.fontTickLabels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 4px;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--dsw-alias-label-tertiary);
+}
+
+.fontTickLabelActive {
+  color: var(--dsw-alias-brand-text);
+  font-weight: 500;
+}

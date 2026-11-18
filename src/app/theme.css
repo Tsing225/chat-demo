@@ -3,6 +3,8 @@
     system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell,
     'Open Sans', 'Helvetica Neue', sans-serif;
   font-variant-ligatures: no-contextual;
+  /* 字体缩放倍率：字体大小设置写入 documentElement（见 services/fontScale.ts），默认 1。 */
+  --font-scale: 1;
 }
 
 body {
@@ -12,7 +14,7 @@ body {
   --ds-control-height-s: 32px;
   --ds-control-height-xs: 28px;
 
-  --ds-font-size-m: 14px;
+  --ds-font-size-m: calc(14px * var(--font-scale, 1));
 
   --ds-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
 
@@ -222,32 +224,47 @@ body {
     0 0 1px 0 rgba(0, 0, 0, 0.2), 0 0 4px 0 rgba(0, 0, 0, 0.02), 0 12px 32px 0 rgba(0, 0, 0, 0.08);
 }
 
+/* 以下字号变量的字号与行高都乘以 --font-scale，随字体大小设置缩放（calc 在 font 简写内合法）。 */
 body {
-  --dsw-font-markdown-h1: 700 24px/34px var(--dsw-font-family);
+  --dsw-font-markdown-h1: 700 calc(24px * var(--font-scale, 1)) / calc(34px * var(--font-scale, 1))
+    var(--dsw-font-family);
 
-  --dsw-font-markdown-h2: 700 22px/32px var(--dsw-font-family);
+  --dsw-font-markdown-h2: 700 calc(22px * var(--font-scale, 1)) / calc(32px * var(--font-scale, 1))
+    var(--dsw-font-family);
 
-  --dsw-font-markdown-h3: 700 20px/30px var(--dsw-font-family);
+  --dsw-font-markdown-h3: 700 calc(20px * var(--font-scale, 1)) / calc(30px * var(--font-scale, 1))
+    var(--dsw-font-family);
 
-  --dsw-font-markdown-h4: 600 16px/28px var(--dsw-font-family);
+  --dsw-font-markdown-h4: 600 calc(16px * var(--font-scale, 1)) / calc(28px * var(--font-scale, 1))
+    var(--dsw-font-family);
 
-  --dsw-font-markdown-base: 16px/28px var(--dsw-font-family);
+  --dsw-font-markdown-base: calc(16px * var(--font-scale, 1)) / calc(28px * var(--font-scale, 1))
+    var(--dsw-font-family);
 
-  --dsw-font-markdown-base-strong: 600 16px/28px var(--dsw-font-family);
+  --dsw-font-markdown-base-strong: 600 calc(16px * var(--font-scale, 1)) / calc(28px * var(--font-scale, 1))
+    var(--dsw-font-family);
 
-  --dsw-font-markdown-table: 15px/25px var(--dsw-font-family);
+  --dsw-font-markdown-table: calc(15px * var(--font-scale, 1)) / calc(25px * var(--font-scale, 1))
+    var(--dsw-font-family);
 
-  --dsw-font-markdown-table-head: 500 15px/25px var(--dsw-font-family);
+  --dsw-font-markdown-table-head: 500 calc(15px * var(--font-scale, 1)) / calc(25px * var(--font-scale, 1))
+    var(--dsw-font-family);
 
-  --dsw-font-markdown-small: 14px/24px var(--dsw-font-family);
+  --dsw-font-markdown-small: calc(14px * var(--font-scale, 1)) / calc(24px * var(--font-scale, 1))
+    var(--dsw-font-family);
 
-  --dsw-font-markdown-small-strong: 600 14px/24px var(--dsw-font-family);
+  --dsw-font-markdown-small-strong: 600 calc(14px * var(--font-scale, 1)) / calc(24px * var(--font-scale, 1))
+    var(--dsw-font-family);
 
-  --dsw-font-markdown-code: 14px/22px var(--ds-font-family-code);
+  --dsw-font-markdown-code: calc(14px * var(--font-scale, 1)) / calc(22px * var(--font-scale, 1))
+    var(--ds-font-family-code);
 
-  --dsw-font-markdown-code-block: 13px/22px var(--ds-font-family-code);
+  --dsw-font-markdown-code-block: calc(13px * var(--font-scale, 1)) / calc(22px * var(--font-scale, 1))
+    var(--ds-font-family-code);
 
-  --dsw-font-s-strong-14: 500 14px/22px var(--dsw-font-family);
+  --dsw-font-s-strong-14: 500 calc(14px * var(--font-scale, 1)) / calc(22px * var(--font-scale, 1))
+    var(--dsw-font-family);
 
-  --dsw-font-xs-13: 13px/20px var(--dsw-font-family);
+  --dsw-font-xs-13: calc(13px * var(--font-scale, 1)) / calc(20px * var(--font-scale, 1))
+    var(--dsw-font-family);
 }

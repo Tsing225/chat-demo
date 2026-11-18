@@ -10,6 +10,8 @@ public class MainActivity extends BridgeActivity {
         // Manually register the in-app APK installer plugin before the bridge is created.
         // cap sync only scans node_modules for plugins, so this registration cannot be wiped.
         registerPlugin(ApkInstallerPlugin.class);
+        // Same manual registration for the system font scale reader (FontScalePlugin).
+        registerPlugin(FontScalePlugin.class);
         super.onCreate(savedInstanceState);
     }
 }

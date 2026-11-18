@@ -280,4 +280,20 @@ export const en = {
   deleteSessionsWithFilesDescription:
     'These chats and their uploaded files will be permanently deleted and cannot be recovered. Delete them?',
   messageTimeYesterday: 'Yesterday {time}',
+  settingsFontSize: 'Font size',
+  settingsFontSizeFollowSystem: 'Follow system',
+  settingsFontSizeFollowSystemDescription:
+    'Use the system font size; manual levels are ignored while on',
+  settingsFontSizeSmall: 'Small',
+  settingsFontSizeStandard: 'Standard',
+  settingsFontSizeLarge: 'Large',
+  settingsFontSizeXLarge: 'Extra large',
+  sessionItemMenuExportOption: 'Export conversation',
+  sessionExportCopied: 'Conversation copied as Markdown — paste it into any app to share',
+  sessionExportCopyFailed: 'Copy failed, please try again',
+  sessionExportEmpty: 'This conversation has nothing to export',
+  sessionExportDate: 'Date',
+  sessionExportUserHeading: 'User',
+  sessionExportAssistantHeading: 'Assistant',
+  sessionExportAttachments: 'Attachments: {names}',
 } satisfies Record<keyof typeof zh, string>

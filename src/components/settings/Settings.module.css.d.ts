@@ -41,6 +41,20 @@ declare const styles: {
   readonly "priceTable": string;
   readonly "pricePeak": string;
   readonly "priceOffPeak": string;
+  readonly "fontSize": string;
+  readonly "fontSizeHeader": string;
+  readonly "fontSizeToggle": string;
+  readonly "fontSwitch": string;
+  readonly "fontSwitchOn": string;
+  readonly "fontSwitchKnob": string;
+  readonly "fontSlider": string;
+  readonly "fontTrack": string;
+  readonly "fontRail": string;
+  readonly "fontFill": string;
+  readonly "fontTick": string;
+  readonly "fontKnob": string;
+  readonly "fontTickLabels": string;
+  readonly "fontTickLabelActive": string;
 };
 export = styles;
 

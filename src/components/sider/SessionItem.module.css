@@ -6,8 +6,8 @@
   height: 40px;
   padding: 9px 6px 9px 10px;
   border-radius: 12px;
-  font-size: 14px;
-  line-height: 22px;
+  font-size: calc(14px * var(--font-scale, 1));
+  line-height: calc(22px * var(--font-scale, 1));
   color: var(--dsw-alias-label-primary);
   cursor: pointer;
 
@@ -36,7 +36,7 @@
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
-  line-height: 18px;
+  line-height: calc(18px * var(--font-scale, 1));
 }
 
 .action {
@@ -55,7 +55,7 @@
   background-color: var(--dsw-specific-input-major);
   color: var(--dsw-alias-label-primary);
   font: inherit;
-  font-size: 14px;
+  font-size: calc(14px * var(--font-scale, 1));
   outline: none;
 }
 
@@ -70,18 +70,18 @@
     height: 44px;
     padding: 11px 6px 11px 12px;
     border-radius: 16px;
-    font-size: 16px;
+    font-size: calc(16px * var(--font-scale, 1));
   }
 
   .title {
-    line-height: 22px;
+    line-height: calc(22px * var(--font-scale, 1));
   }
 
   .renameInput {
     height: 44px;
     padding: 0 12px;
     border-radius: 16px;
-    font-size: 16px;
+    font-size: calc(16px * var(--font-scale, 1));
   }
 }
 

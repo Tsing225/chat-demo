@@ -8,7 +8,10 @@ export type Locale = 'zh-CN' | 'en-US'
 /** 主题偏好；默认跟随系统 */
 export type ThemePreference = 'light' | 'dark' | 'system'
 
-/** 本机设置，存 localStorage：API Key、语言、主题、位置、朗读音色、深度思考与智能搜索开关、侧边栏收起状态 */
+/** 字体大小档位；默认标准 */
+export type FontSizeLevel = 'small' | 'standard' | 'large' | 'xlarge'
+
+/** 本机设置，存 localStorage：API Key、语言、主题、位置、朗读音色、深度思考与智能搜索开关、侧边栏收起状态、字体大小 */
 type Settings = {
   apiKey: string | null
   locale: Locale
@@ -22,6 +25,10 @@ type Settings = {
   githubProxyPrefix: string
   /** 推理强度（output_config.effort），默认 high（与服务端默认一致）。 */
   reasoningEffort: ReasoningEffort
+  /** 字体大小档位，默认标准；跟随系统开启时忽略。 */
+  fontSize: FontSizeLevel
+  /** 跟随系统字体大小；开启时读取 Android 系统字号，手动档位不生效。 */
+  followSystemFontSize: boolean
 }
 
 const KEYS = {
@@ -35,6 +42,8 @@ const KEYS = {
   siderCollapsed: 'chat-demo:sider-collapsed',
   githubProxyPrefix: 'chat-demo:github-proxy-prefix',
   reasoningEffort: 'chat-demo:reasoning-effort',
+  fontSize: 'chat-demo:font-size',
+  followSystemFontSize: 'chat-demo:follow-system-font-size',
 } as const
 
 const read = (key: string) => {
@@ -102,6 +111,14 @@ const initialReasoningEffort = (): ReasoningEffort => {
     : 'high'
 }
 
+/** 未保存过或保存的值不在四档之内时用标准。 */
+const initialFontSize = (): FontSizeLevel => {
+  const saved = read(KEYS.fontSize)
+  return saved === 'small' || saved === 'standard' || saved === 'large' || saved === 'xlarge'
+    ? saved
+    : 'standard'
+}
+
 export const useSettings = create<Settings>(() => ({
   apiKey: read(KEYS.apiKey),
   locale: initialLocale(),
@@ -113,6 +130,8 @@ export const useSettings = create<Settings>(() => ({
   siderCollapsed: read(KEYS.siderCollapsed) === 'true',
   githubProxyPrefix: read(KEYS.githubProxyPrefix) ?? '',
   reasoningEffort: initialReasoningEffort(),
+  fontSize: initialFontSize(),
+  followSystemFontSize: read(KEYS.followSystemFontSize) === 'true',
 }))
 
 export const setLocale = (locale: Locale) => {
@@ -164,4 +183,14 @@ export const setGithubProxyPrefix = (githubProxyPrefix: string) => {
 export const setReasoningEffort = (reasoningEffort: ReasoningEffort) => {
   write(KEYS.reasoningEffort, reasoningEffort)
   useSettings.setState({ reasoningEffort })
+}
+
+export const setFontSize = (fontSize: FontSizeLevel) => {
+  write(KEYS.fontSize, fontSize)
+  useSettings.setState({ fontSize })
+}
+
+export const setFollowSystemFontSize = (followSystemFontSize: boolean) => {
+  write(KEYS.followSystemFontSize, String(followSystemFontSize))
+  useSettings.setState({ followSystemFontSize })
 }

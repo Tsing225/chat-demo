@@ -4,11 +4,14 @@ import { useTranslate } from '../../i18n/index.js'
 import {
   IconArchiveOutline16,
   IconCheckOutline16,
+  IconDownloadOutline16,
   IconEditOutline16,
   IconEllipsisOutline16,
   IconPinOutline16,
   IconTrashOutline16,
 } from '../base/icons.js'
+import { showToast } from '../base/toastState.js'
+import { exportSessionMarkdown } from '../../services/chat/exportSession.js'
 import { renameSession, selectSession, setSessionFlags } from '../../services/chat/store.js'
 import type { SessionSummary } from '../../services/chat/types.js'
 import { IconButton } from '../base/IconButton.js'
@@ -35,6 +38,18 @@ export const SessionItem = memo(function SessionItem({
   const t = useTranslate()
   const [editing, setEditing] = useState(false)
   const displayTitle = session.title || t('untitledChat')
+
+  /** 导出单个会话为 Markdown 并复制到剪贴板，结果用 Toast 告知。 */
+  const handleExport = async () => {
+    const result = await exportSessionMarkdown(session.id)
+    if (result === 'copied') {
+      showToast({ key: 'sessionExportCopied' })
+    } else if (result === 'empty') {
+      showToast({ key: 'sessionExportEmpty' })
+    } else {
+      showToast({ key: 'sessionExportCopyFailed', type: 'error' })
+    }
+  }
 
   if (editing) {
     const finish = (title: string) => {
@@ -113,6 +128,12 @@ export const SessionItem = memo(function SessionItem({
                   : t('sessionItemMenuArchiveOption'),
                 icon: <IconArchiveOutline16 />,
                 onSelect: () => setSessionFlags(session.id, { archived: !session.archived }),
+              },
+              {
+                key: 'export',
+                label: t('sessionItemMenuExportOption'),
+                icon: <IconDownloadOutline16 />,
+                onSelect: () => void handleExport(),
               },
               {
                 key: 'delete',
