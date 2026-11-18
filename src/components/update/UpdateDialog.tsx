@@ -223,10 +223,11 @@ const UpdateDialog = ({ release }: { release: AvailableRelease }) => {
                   : `${styles.progressFill} ${styles.progressFillUnknown}`
               }
               style={{
+                // Unknown total: 40%-wide sliding bar (see progressFillUnknown), never full.
                 width:
                   progress && progress.totalBytes > 0
                     ? `${Math.min(100, Math.max(0, (progress.downloadedBytes / progress.totalBytes) * 100))}%`
-                    : '100%',
+                    : '40%',
               }}
             />
           </div>

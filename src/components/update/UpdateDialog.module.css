@@ -26,18 +26,18 @@
   transition: width 0.2s ease;
 }
 
+/* Unknown total: a 40%-wide block slides across the track, never a full bar. */
 .progressFillUnknown {
-  animation: progressPulse 1.2s ease-in-out infinite;
+  animation: progressSlide 1.4s ease-in-out infinite;
 }
 
-@keyframes progressPulse {
-  0%,
-  100% {
-    opacity: 0.45;
+@keyframes progressSlide {
+  from {
+    transform: translateX(-100%);
   }
 
-  50% {
-    opacity: 1;
+  to {
+    transform: translateX(250%);
   }
 }
 
