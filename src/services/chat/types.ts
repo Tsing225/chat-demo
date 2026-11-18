@@ -3,6 +3,7 @@ import type { ApiErrorKind } from '../api/client.js'
 import type {
   ChatModel,
   MessageUsage,
+  ReasoningEffort,
   ServerToolBlock,
   StopDetails,
   StopReason,
@@ -81,6 +82,8 @@ export type AssistantMessage = MessageBranch & {
   thinking?: boolean
   /** 请求时是否声明 deepseek_web_search；关闭时仍声明 deepseek_read_url */
   search?: boolean
+  /** 请求时使用的推理强度；未记录时续写使用当前设置。 */
+  effort?: ReasoningEffort
   /** 本轮请求的系统信息快照；各回答版本独立保存，续写沿用。历史消息中缺省的快照保持为空。 */
   latestReminder?: string
   /** 是否允许作为续写前缀；仍需满足回复状态与内容限制。 */
@@ -92,6 +95,8 @@ export type AssistantMessage = MessageBranch & {
   stopDetails?: StopDetails
   /** 最近一次请求的用量，续写后更新 */
   usage?: MessageUsage
+  /** 最近一次请求的估算费用（元），落定时按当时价格写入；旧消息缺省时现场估算。 */
+  cost?: number
   error?: {
     /** upload：发送前补传附件失败，请求没有发出 */
     kind: ApiErrorKind | 'upload'

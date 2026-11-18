@@ -6,6 +6,13 @@
 
 export type ChatModel = 'deepseek-flash' | 'deepseek-v4-pro'
 
+/**
+ * 推理强度（Messages API 的 output_config.effort）：low / medium / high / max。
+ * 官方文档：默认 high；medium 映射为 high；max 推理最深。thinking.budget_tokens
+ * 是兼容字段、会被忽略，没有连续的 token 预算可调，因此只提供四档离散强度。
+ */
+export type ReasoningEffort = 'low' | 'medium' | 'high' | 'max'
+
 // ---------- 响应：内容块 ----------
 
 /** 正文引用：服务端把模型的引用标记还原为来源，挂在对应文本块上 */
@@ -177,6 +184,8 @@ export type CreateMessageRequest = {
   system: string
   messages: MessageParam[]
   thinking: { type: 'enabled' | 'disabled' }
+  /** 推理强度：只在思考模式开启时发送；显式设置的 thinking.type 决定是否开启思考。 */
+  output_config?: { effort: ReasoningEffort }
   tools: (DeepseekWebSearchTool | DeepseekReadUrlTool)[]
   safety_check: { level: 'high' }
   title?: { enabled: boolean }

@@ -251,10 +251,6 @@
   min-width: 0;
 }
 
-.collapsedToggles .toggleLabel {
-  display: none;
-}
-
 .toggle {
   display: inline-flex;
   flex-shrink: 0;
@@ -328,5 +324,30 @@
   &.disabled {
     opacity: 0.4;
     cursor: not-allowed;
+  }
+}
+
+.contextBar {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 0 16px 6px;
+  overflow: hidden;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--dsw-alias-label-tertiary);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 窄屏上收紧开关内边距与字号，让四字中文标签始终完整可见。 */
+@media not all and (min-width: 440px) {
+  .toggles {
+    gap: 6px;
+  }
+
+  .toggle {
+    gap: 3px;
+    padding: 0 8px;
+    font-size: 12px;
   }
 }

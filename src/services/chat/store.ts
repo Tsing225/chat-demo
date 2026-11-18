@@ -4,6 +4,7 @@ import { ApiError, streamMessage } from '../api/client.js'
 import type { ChatModel, CreateMessageRequest } from '../api/types.js'
 import { extractFileIds, getFileErrorCode, isRetryableApiError } from '../api/errors.js'
 import { cancelUpload, describeUploadError, uploadAttachment, useUploads } from '../attachments.js'
+import { getEffectivePrices, withSettledCost } from '../pricing.js'
 import { useSettings } from '../settings.js'
 import { appendBranch, getVisibleMessages, normalizeSession, selectVersion } from './branches.js'
 import * as db from './db.js'
@@ -253,9 +254,9 @@ export const bindChatPersistence = () => {
   }
 }
 
-/** 按当前开关创建回复：深度思考对应 thinking，智能搜索控制 deepseek_web_search。 */
+/** 按当前开关创建回复：深度思考对应 thinking，智能搜索控制 deepseek_web_search，推理强度随请求快照。 */
 const createReply = (): AssistantMessage => {
-  const { thinking, search } = useSettings.getState()
+  const { thinking, search, reasoningEffort } = useSettings.getState()
   return {
     id: createId(),
     role: 'assistant',
@@ -263,6 +264,7 @@ const createReply = (): AssistantMessage => {
     model: MODEL,
     thinking,
     search,
+    effort: reasoningEffort,
     prefix: true,
     status: 'pending',
     blocks: [],
@@ -705,13 +707,14 @@ export const continueReply = (sessionId: string, messageId: string) => {
   ) {
     return
   }
-  const { thinking, search } = useSettings.getState()
+  const { thinking, search, reasoningEffort } = useSettings.getState()
   const reply: AssistantMessage = {
     ...previous,
     // 未记录请求配置的回复，续写时使用默认模型和当前开关。
     model: previous.model ?? MODEL,
     thinking: previous.thinking ?? thinking,
     search: previous.search ?? search,
+    effort: previous.effort ?? reasoningEffort,
     status: 'pending',
     stopReason: undefined,
     stopDetails: undefined,
@@ -1003,6 +1006,14 @@ const streamReply = async (sessionId: string, initial: AssistantMessage, request
             system: SYSTEM_PROMPT,
             messages,
             thinking: { type: initial.thinking ? 'enabled' : 'disabled' },
+            // 推理强度只在思考模式生效；关闭思考时不发送，与旧行为一致。
+            ...(initial.thinking
+              ? {
+                  output_config: {
+                    effort: initial.effort ?? useSettings.getState().reasoningEffort,
+                  },
+                }
+              : {}),
             safety_check: SAFETY_CHECK,
             tools: serverTools(initial.search ?? false),
             ...(titleRequests.has(controller) ? { title: { enabled: true } } : {}),
@@ -1083,6 +1094,8 @@ const streamReply = async (sessionId: string, initial: AssistantMessage, request
     titleRequests.delete(controller)
     streamFlushes.delete(sessionId)
     cancelAnimationFrame(frame)
+    // 落定时按当前价格与此时段写入估算费用，随 persist 一起落盘；续写会重新计算。
+    reply = withSettledCost(reply, getEffectivePrices(), new Date())
     updateReply(sessionId, reply)
     set((state) => ({
       streaming: Object.fromEntries(

@@ -1,0 +1,139 @@
+.effort {
+  --effort-color: #3b82f6;
+  padding: 2px 12px 10px;
+}
+
+.effort[data-level='1'] {
+  --effort-color: #6366f1;
+}
+
+.effort[data-level='2'] {
+  --effort-color: #8b5cf6;
+}
+
+.effort[data-level='3'] {
+  --effort-color: #c026d3;
+}
+
+.effort[data-disabled='true'] {
+  opacity: 0.45;
+}
+
+.header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+}
+
+.title {
+  flex-shrink: 0;
+  font-size: 13px;
+  line-height: 20px;
+  font-weight: 500;
+  color: var(--dsw-alias-label-primary);
+}
+
+.status {
+  min-width: 0;
+  overflow: hidden;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--dsw-alias-label-tertiary);
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.track {
+  position: relative;
+  height: 44px;
+  touch-action: none;
+  cursor: pointer;
+  outline: none;
+}
+
+.track:focus-visible {
+  box-shadow: 0 0 0 2px var(--dsw-alias-button-primary-fill);
+  border-radius: 8px;
+}
+
+.effort[data-disabled='true'] .track {
+  cursor: default;
+}
+
+.rail,
+.fill {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  height: 6px;
+  border-radius: 3px;
+  transform: translateY(-50%);
+}
+
+.rail {
+  width: 100%;
+  background-color: var(--dsw-alias-interactive-bg-hover);
+}
+
+.fill {
+  background-color: var(--effort-color);
+  transition: width 80ms ease;
+}
+
+.effort[data-dragging='true'] .fill {
+  transition: none;
+}
+
+.tick {
+  position: absolute;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--dsw-alias-bg-layer-2);
+  border: 2px solid var(--dsw-alias-border-l2);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.knob {
+  position: absolute;
+  top: 50%;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: var(--effort-color);
+  border: 3px solid var(--dsw-static-neutral-bluish-00);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+  transform: translate(-50%, -50%);
+  transition: left 80ms ease;
+  pointer-events: none;
+}
+
+.effort[data-dragging='true'] .knob {
+  transition: none;
+}
+
+/* Max 档的轻量光晕（纯 CSS，不用 WebGL）。 */
+.effort[data-level='3'] .knob {
+  box-shadow:
+    0 1px 4px rgba(0, 0, 0, 0.25),
+    0 0 12px var(--effort-color);
+}
+
+.tickLabels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: -6px;
+  font-size: 11px;
+  line-height: 16px;
+  color: var(--dsw-alias-label-tertiary);
+}
+
+.tickLabelActive {
+  color: var(--effort-color);
+  font-weight: 600;
+}

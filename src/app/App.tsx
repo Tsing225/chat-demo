@@ -16,6 +16,8 @@ import { MobileHeader } from '../components/session/MobileHeader.js'
 import { Welcome } from '../components/session/Welcome.js'
 import { ensureApiKey } from '../components/settings/settingsDialogState.js'
 import { SettingsDialog } from '../components/settings/SettingsDialog.js'
+import { UpdatePromptHost } from '../components/update/UpdateDialog.js'
+import { loadPrices } from '../services/pricing.js'
 import { Toast } from '../components/base/Toast.js'
 import { showToast } from '../components/base/toastState.js'
 import { onUploadNotice } from '../services/attachments.js'
@@ -71,6 +73,11 @@ export const App = () => {
     void initChat()
     // 首次打开先在设置里输入 API Key
     ensureApiKey()
+  }, [])
+
+  // 在线价格拉取失败时静默使用内置价格，不阻塞启动
+  useEffect(() => {
+    void loadPrices()
   }, [])
 
   return (
@@ -134,6 +141,7 @@ export const App = () => {
       </div>
       <SettingsDialog />
       <Toast />
+      <UpdatePromptHost />
     </>
   )
 }

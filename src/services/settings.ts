@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import type { TtsVoice } from './api/speech.js'
+import type { ReasoningEffort } from './api/types.js'
 import { normalizeLocation, type UserLocation } from './location.js'
 
 export type Locale = 'zh-CN' | 'en-US'
@@ -17,6 +18,10 @@ type Settings = {
   thinking: boolean
   search: boolean
   siderCollapsed: boolean
+  /** GitHub 文件下载加速前缀；空字符串表示使用官方地址。 */
+  githubProxyPrefix: string
+  /** 推理强度（output_config.effort），默认 high（与服务端默认一致）。 */
+  reasoningEffort: ReasoningEffort
 }
 
 const KEYS = {
@@ -28,6 +33,8 @@ const KEYS = {
   thinking: 'chat-demo:thinking',
   search: 'chat-demo:search',
   siderCollapsed: 'chat-demo:sider-collapsed',
+  githubProxyPrefix: 'chat-demo:github-proxy-prefix',
+  reasoningEffort: 'chat-demo:reasoning-effort',
 } as const
 
 const read = (key: string) => {
@@ -87,6 +94,14 @@ const initialThemePreference = (): ThemePreference => {
 /** 未保存过时使用服务端默认音色 stella（海星） */
 const initialTtsVoice = (): TtsVoice => (read(KEYS.ttsVoice) === 'tide' ? 'tide' : 'stella')
 
+/** 未保存过或保存的值不在四档之内时用 high（服务端默认强度）。 */
+const initialReasoningEffort = (): ReasoningEffort => {
+  const saved = read(KEYS.reasoningEffort)
+  return saved === 'low' || saved === 'medium' || saved === 'high' || saved === 'max'
+    ? saved
+    : 'high'
+}
+
 export const useSettings = create<Settings>(() => ({
   apiKey: read(KEYS.apiKey),
   locale: initialLocale(),
@@ -96,6 +111,8 @@ export const useSettings = create<Settings>(() => ({
   thinking: read(KEYS.thinking) === 'true',
   search: read(KEYS.search) === 'true',
   siderCollapsed: read(KEYS.siderCollapsed) === 'true',
+  githubProxyPrefix: read(KEYS.githubProxyPrefix) ?? '',
+  reasoningEffort: initialReasoningEffort(),
 }))
 
 export const setLocale = (locale: Locale) => {
@@ -137,4 +154,14 @@ export const setSearch = (search: boolean) => {
 export const setSiderCollapsed = (siderCollapsed: boolean) => {
   write(KEYS.siderCollapsed, String(siderCollapsed))
   useSettings.setState({ siderCollapsed })
+}
+
+export const setGithubProxyPrefix = (githubProxyPrefix: string) => {
+  write(KEYS.githubProxyPrefix, githubProxyPrefix)
+  useSettings.setState({ githubProxyPrefix })
+}
+
+export const setReasoningEffort = (reasoningEffort: ReasoningEffort) => {
+  write(KEYS.reasoningEffort, reasoningEffort)
+  useSettings.setState({ reasoningEffort })
 }
