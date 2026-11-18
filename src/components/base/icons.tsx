@@ -523,3 +523,14 @@ export const IconToastError16 = () => (
     />
   </svg>
 )
+
+/** Camera icon for the capture button: solid body with a ring lens. */
+export const IconCameraOutline16 = () => (
+  <svg width={16} height={16} viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path
+      d="M3 4H5.5L6.5 2H9.5L10.5 4H13C13.55 4 14 4.45 14 5V13C14 13.55 13.55 14 13 14H3C2.45 14 2 13.55 2 13V5C2 4.45 2.45 4 3 4ZM8 6A3 3 0 1 0 8 12A3 3 0 1 0 8 6ZM8 7.7A1.3 1.3 0 1 0 8 10.3A1.3 1.3 0 1 0 8 7.7Z"
+      fill="currentColor"
+      fillRule="evenodd"
+    />
+  </svg>
+)

@@ -1,6 +1,7 @@
 import clsx from 'clsx'
 import { memo, useCallback, useEffect, useRef } from 'react'
 import {
+  IconCameraOutline16,
   IconGlobeLanguageOutline14,
   IconPaperclipOutline16,
   IconSendOutline16,
@@ -26,7 +27,7 @@ import { Tooltip } from '../base/Tooltip.js'
 import { ensureApiKey } from '../settings/settingsDialogState.js'
 import { DragMask, useFileDrop } from './DragMask.js'
 import { showToast } from '../base/toastState.js'
-import { ACCEPT, useUploads } from '../../services/attachments.js'
+import { ACCEPT, getFileExt, useUploads } from '../../services/attachments.js'
 import { DraftAttachments } from './DraftAttachments.js'
 import { useVoiceInput } from './useVoiceInput.js'
 import { VoiceButton } from './VoiceButton.js'
@@ -40,6 +41,9 @@ import {
 } from '../../services/pricing.js'
 import { EffortSlider } from './EffortSlider.js'
 import styles from './ChatInput.module.css'
+
+/** Accepted image extensions (upload whitelist, see uploadExts.ts) for camera captures. */
+const IMAGE_EXTS = new Set(['png', 'jpg', 'jpeg', 'svg', 'svgz', 'bmp', 'gif', 'webp', 'ico', 'xbm', 'dib', 'pjp', 'tif', 'pjpeg', 'avif', 'apng', 'tiff', 'jfif'])
 
 /** 输入框上方的一行小字：上下文剩余百分比与本对话累计费用（均为约数）。新对话显示满格与 0.00。 */
 const ContextBar = ({ sessionId }: { sessionId: string | null }) => {
@@ -79,6 +83,7 @@ const Input = ({ sessionId }: { sessionId: string | null }) => {
   const isMobile = useIsMobile()
   const search = useSettings((state) => state.search)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const cameraInputRef = useRef<HTMLInputElement | null>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   const acceptFiles = (files: File[]) => {
@@ -89,6 +94,14 @@ const Input = ({ sessionId }: { sessionId: string | null }) => {
     if (error) {
       showToast(error)
     }
+  }
+  // Camera captures can arrive with an extensionless name; validateFiles
+  // rejects those, so normalize to a .jpg name before the shared path.
+  const acceptPhoto = (file: File) => {
+    const photo = IMAGE_EXTS.has(getFileExt(file.name))
+      ? file
+      : new File([file], 'photo-' + Date.now() + '.jpg', { type: 'image/jpeg' })
+    acceptFiles([photo])
   }
   const retryFile = useCallback(
     (id: string) => {
@@ -266,6 +279,31 @@ const Input = ({ sessionId }: { sessionId: string | null }) => {
               accept={ACCEPT}
               onChange={(event) => {
                 acceptFiles(Array.from(event.target.files ?? []))
+                event.target.value = ''
+              }}
+            />
+            <IconButton
+              size="m"
+              tone="primary"
+              icon={<IconCameraOutline16 />}
+              tooltip={t('takePhoto')}
+              disabled={importingHistory}
+              onClick={() => ensureApiKey() && cameraInputRef.current?.click()}
+            />
+            <input
+              ref={(element) => {
+                cameraInputRef.current = element
+                element?.setAttribute('capture', 'environment')
+              }}
+              type="file"
+              hidden
+              accept="image/*"
+              capture="environment"
+              onChange={(event) => {
+                const file = event.target.files?.[0]
+                if (file) {
+                  acceptPhoto(file)
+                }
                 event.target.value = ''
               }}
             />
