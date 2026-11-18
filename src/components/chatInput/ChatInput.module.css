@@ -339,10 +339,23 @@
   white-space: nowrap;
 }
 
-/* 窄屏上收紧开关内边距与字号，让四字中文标签始终完整可见。 */
+/* 窄屏工具栏分两行：开关独占一行，操作按钮第二行右对齐。单行放不下
+   两枚四字标签 + 麦克风 / 附件 / 拍照 / 发送（360px 宽时单行约溢出 32px，实测），
+   麦克风会贴到联网搜索标签边缘；分行后不再有任何重叠。同时收紧开关
+   内边距与字号，让四字中文标签始终完整可见。 */
 @media not all and (min-width: 440px) {
+  .functionRow {
+    flex-wrap: wrap;
+    row-gap: 8px;
+  }
+
   .toggles {
+    flex-basis: 100%;
     gap: 6px;
+  }
+
+  .right {
+    margin-left: auto;
   }
 
   .toggle {
