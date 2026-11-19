@@ -252,7 +252,6 @@ export const en = {
   composerSearchLabel: 'Web Search',
   effortLabel: 'Reasoning effort',
   effortHintLow: 'Shallow reasoning · faster · cheaper',
-  effortHintMiddle: 'Medium reasoning · same as High',
   effortHintHigh: 'Deep reasoning · default effort',
   effortHintMax: 'Deepest reasoning · slower · pricier',
   effortDisabledHint: 'Enable DeepThink to use',

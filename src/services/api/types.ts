@@ -7,11 +7,11 @@
 export type ChatModel = 'deepseek-flash' | 'deepseek-v4-pro'
 
 /**
- * 推理强度（Messages API 的 output_config.effort）：low / medium / high / max。
- * 官方文档：默认 high；medium 映射为 high；max 推理最深。thinking.budget_tokens
- * 是兼容字段、会被忽略，没有连续的 token 预算可调，因此只提供四档离散强度。
+ * 推理强度（Messages API 的 output_config.effort）：low / high / max。
+ * 官方文档：默认 high；max 推理最深。thinking.budget_tokens
+ * 是兼容字段、会被忽略，没有连续的 token 预算可调，因此只提供三档离散强度。
  */
-export type ReasoningEffort = 'low' | 'medium' | 'high' | 'max'
+export type ReasoningEffort = 'low' | 'high' | 'max'
 
 // ---------- 响应：内容块 ----------
 

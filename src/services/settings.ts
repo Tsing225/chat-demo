@@ -106,12 +106,11 @@ const initialThemePreference = (): ThemePreference => {
 /** 未保存过时使用服务端默认音色 stella（海星） */
 const initialTtsVoice = (): TtsVoice => (read(KEYS.ttsVoice) === 'tide' ? 'tide' : 'stella')
 
-/** 未保存过或保存的值不在四档之内时用 high（服务端默认强度）。 */
+/** 未保存过或保存的值不在三档之内时用 high（服务端默认强度）。 */
+// 旧档位 Middle（存为 medium）已删除：不在三档之内，按上面规则自动落到 High。
 const initialReasoningEffort = (): ReasoningEffort => {
   const saved = read(KEYS.reasoningEffort)
-  return saved === 'low' || saved === 'medium' || saved === 'high' || saved === 'max'
-    ? saved
-    : 'high'
+  return saved === 'low' || saved === 'high' || saved === 'max' ? saved : 'high'
 }
 
 /** 未保存过或保存的值不在四档之内时用标准。 */

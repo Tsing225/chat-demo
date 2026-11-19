@@ -246,7 +246,6 @@ export const zh = {
   composerSearchLabel: '联网搜索',
   effortLabel: '推理强度',
   effortHintLow: '推理较浅 · 更快 · 更省',
-  effortHintMiddle: '推理适中 · 等同 High',
   effortHintHigh: '推理较深 · 默认强度',
   effortHintMax: '推理最深 · 更慢 · 更贵',
   effortDisabledHint: '开启深度解析后可用',
