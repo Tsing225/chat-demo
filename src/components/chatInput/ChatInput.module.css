@@ -343,6 +343,92 @@
    两枚四字标签 + 麦克风 / 附件 / 拍照 / 发送（360px 宽时单行约溢出 32px，实测），
    麦克风会贴到联网搜索标签边缘；分行后不再有任何重叠。同时收紧开关
    内边距与字号，让四字中文标签始终完整可见。 */
+/* 折叠控制：functionRow 右侧的收起按钮（发送按钮之后），与发送按钮同尺寸；
+   窄屏下它落在工具栏第二行末尾，与麦克风 / 附件 / 拍照 / 发送同行不重叠。 */
+.collapseButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background-color: transparent;
+  color: var(--dsw-alias-label-primary);
+  cursor: pointer;
+}
+
+.collapseButton:hover:not(:disabled) {
+  background-color: var(--dsw-alias-interactive-bg-hover);
+}
+
+.collapseButton:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* 折叠态：只剩一条 48px 的细栏（草稿预览 + 展开箭头，流式回答时保留停止按钮） */
+.wrapper.collapsed {
+  cursor: default;
+}
+
+.collapsedBar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 48px;
+  padding: 8px 8px 8px 16px;
+  box-sizing: border-box;
+}
+
+.collapsedExpand {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--dsw-alias-label-primary);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.collapsedPreview {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--dsw-alias-label-caption);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.collapsedPreviewHasDraft {
+  color: var(--dsw-alias-label-primary);
+}
+
+.collapsedChevron {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  color: var(--dsw-alias-label-tertiary);
+}
+
+/* 用向下的箭头旋转 180° 作展开箭头，不另加图标 */
+.collapsedChevron svg {
+  transform: rotate(180deg);
+}
+
 @media not all and (min-width: 440px) {
   .functionRow {
     flex-wrap: wrap;

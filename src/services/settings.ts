@@ -29,6 +29,8 @@ type Settings = {
   fontSize: FontSizeLevel
   /** 跟随系统字体大小；开启时读取 Android 系统字号，手动档位不生效。 */
   followSystemFontSize: boolean
+  /** 翻看对话时自动折叠输入框；默认开启，未保存过时也开启。 */
+  autoCollapseInput: boolean
 }
 
 const KEYS = {
@@ -44,6 +46,7 @@ const KEYS = {
   reasoningEffort: 'chat-demo:reasoning-effort',
   fontSize: 'chat-demo:font-size',
   followSystemFontSize: 'chat-demo:follow-system-font-size',
+  autoCollapseInput: 'chat-demo:auto-collapse-input',
 } as const
 
 const read = (key: string) => {
@@ -132,6 +135,8 @@ export const useSettings = create<Settings>(() => ({
   reasoningEffort: initialReasoningEffort(),
   fontSize: initialFontSize(),
   followSystemFontSize: read(KEYS.followSystemFontSize) === 'true',
+  // 默认开启：从未保存过（null）或保存为 'true' 时都开启，只有显式 'false' 关闭。
+  autoCollapseInput: read(KEYS.autoCollapseInput) !== 'false',
 }))
 
 export const setLocale = (locale: Locale) => {
@@ -193,4 +198,9 @@ export const setFontSize = (fontSize: FontSizeLevel) => {
 export const setFollowSystemFontSize = (followSystemFontSize: boolean) => {
   write(KEYS.followSystemFontSize, String(followSystemFontSize))
   useSettings.setState({ followSystemFontSize })
+}
+
+export const setAutoCollapseInput = (autoCollapseInput: boolean) => {
+  write(KEYS.autoCollapseInput, String(autoCollapseInput))
+  useSettings.setState({ autoCollapseInput })
 }

@@ -289,6 +289,13 @@ export const en = {
   settingsFontSizeStandard: 'Standard',
   settingsFontSizeLarge: 'Large',
   settingsFontSizeXLarge: 'Extra large',
+  settingsAutoCollapseInput: 'Auto-collapse input while reading',
+  settingsAutoCollapseInputDescription:
+    'Collapse the input box when scrolling up through history; expand it again at the bottom',
+  chatInputCollapse: 'Collapse input',
+  chatInputExpand: 'Expand input',
+  chatInputCollapsedHint: 'Tap to expand the input',
+  chatInputCollapsedAttachments: '{count} attachments',
   sessionItemMenuExportOption: 'Export conversation',
   sessionExportCopied: 'Conversation copied as Markdown — paste it into any app to share',
   sessionExportCopyFailed: 'Copy failed, please try again',

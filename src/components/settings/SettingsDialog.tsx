@@ -21,6 +21,7 @@ import { useChatStore } from '../../services/chat/store.js'
 import { regionCodes, getRegionName, provinces } from '../../services/location.js'
 import {
   isChineseBrowser,
+  setAutoCollapseInput,
   setFollowSystemFontSize,
   setFontSize,
   setLocale,
@@ -109,6 +110,7 @@ const SettingsContent = () => {
             <>
               <ThemeSetting />
               <FontSizeSetting />
+              <AutoCollapseInputSetting />
               <LocaleSetting />
               <TtsVoiceSetting />
               <LocationSetting />
@@ -441,6 +443,31 @@ const FontSizeSetting = () => {
       </div>
       <FontSizeSlider disabled={followSystemFontSize} />
     </div>
+  )
+}
+
+/** 翻看对话时自动折叠输入框：默认开启，开关立即生效并持久化（localStorage）。 */
+const AutoCollapseInputSetting = () => {
+  const t = useTranslate()
+  const autoCollapseInput = useSettings((state) => state.autoCollapseInput)
+  return (
+    <SettingCell
+      label={t('settingsAutoCollapseInput')}
+      description={t('settingsAutoCollapseInputDescription')}
+      status={null}
+      action={
+        <button
+          type="button"
+          role="switch"
+          aria-checked={autoCollapseInput}
+          aria-label={t('settingsAutoCollapseInput')}
+          className={clsx(styles.fontSwitch, autoCollapseInput && styles.fontSwitchOn)}
+          onClick={() => setAutoCollapseInput(!autoCollapseInput)}
+        >
+          <span className={styles.fontSwitchKnob} />
+        </button>
+      }
+    />
   )
 }
 

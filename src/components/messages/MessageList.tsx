@@ -9,7 +9,7 @@ import { selectMessageVersion } from '../../services/chat/store.js'
 import type { Session } from '../../services/chat/types.js'
 import { closeSearchPanel } from '../search/searchPanelState.js'
 import { AssistantMessage } from './AssistantMessage.js'
-import { ScrollToBottomContext } from './scrollContext.js'
+import { InputCollapseContext, ScrollToBottomContext } from './scrollContext.js'
 import { UserMessage } from './UserMessage.js'
 import type { Message } from '../../services/chat/types.js'
 import { useTranslate, type TranslationKey, type TranslationParams } from '../../i18n/index.js'
@@ -81,6 +81,10 @@ export const MessageList = ({
   const contentRef = useRef<HTMLDivElement>(null)
   const stickyRef = useRef(true)
   const scrollTopRef = useRef(0)
+  // 底部状态外露给输入框做自动折叠：只在翻转时 setState，避免滚动中反复渲染。
+  const [isAtBottom, setIsAtBottom] = useState(true)
+  const isAtBottomRef = useRef(true)
+  const collapseValue = useMemo(() => ({ isAtBottom }), [isAtBottom])
   const restoreScrollRef = useRef<{ messageId: string; top: number } | null>(null)
   const messages = getVisibleMessages(session)
   const [previousVersions, setPreviousVersions] = useState(() =>
@@ -130,6 +134,8 @@ export const MessageList = ({
       return
     }
     stickyRef.current = true
+    isAtBottomRef.current = true
+    setIsAtBottom(true)
     scrollToBottom()
   }, [session.id, lastMessageId, scrollToBottom])
 
@@ -166,6 +172,16 @@ export const MessageList = ({
         stickyRef.current = true
       } else if (el.scrollTop < scrollTopRef.current) {
         stickyRef.current = false
+      }
+      // 与 stickyRef 用同一判断外露底部状态，供输入框自动折叠 / 展开。
+      const nextAtBottom = nearBottom
+        ? true
+        : el.scrollTop < scrollTopRef.current
+          ? false
+          : isAtBottomRef.current
+      if (nextAtBottom !== isAtBottomRef.current) {
+        isAtBottomRef.current = nextAtBottom
+        setIsAtBottom(nextAtBottom)
       }
       scrollTopRef.current = el.scrollTop
     }
@@ -223,7 +239,9 @@ export const MessageList = ({
             })}
           </div>
         </div>
-        {footer}
+        <InputCollapseContext.Provider value={collapseValue}>
+          {footer}
+        </InputCollapseContext.Provider>
       </div>
     </ScrollToBottomContext.Provider>
   )

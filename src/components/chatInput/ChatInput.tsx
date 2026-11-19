@@ -1,7 +1,8 @@
 import clsx from 'clsx'
-import { memo, useCallback, useEffect, useRef } from 'react'
+import { memo, useCallback, useContext, useEffect, useRef, useState } from 'react'
 import {
   IconCameraOutline16,
+  IconChevronDownOutline14,
   IconGlobeLanguageOutline14,
   IconPaperclipOutline16,
   IconSendOutline16,
@@ -29,6 +30,7 @@ import { DragMask, useFileDrop } from './DragMask.js'
 import { showToast } from '../base/toastState.js'
 import { ACCEPT, getFileExt, useUploads } from '../../services/attachments.js'
 import { DraftAttachments } from './DraftAttachments.js'
+import { InputCollapseContext } from '../messages/scrollContext.js'
 import { useVoiceInput } from './useVoiceInput.js'
 import { VoiceButton } from './VoiceButton.js'
 import { Spectrum } from './Spectrum.js'
@@ -149,6 +151,36 @@ const Input = ({ sessionId }: { sessionId: string | null }) => {
   // 移动端录音时用频谱替代输入框内容
   const recording = voice.status === 'recording'
 
+  // 输入框折叠：手动折叠与自动折叠共用同一状态。草稿（文字与附件）存在
+  // drafts store 中，与 textarea 是否挂载无关，所以折叠不会丢失草稿；
+  // 附件上传任务同样在 useUploads store 中，折叠后继续上传。
+  const autoCollapseInput = useSettings((state) => state.autoCollapseInput)
+  const { isAtBottom } = useContext(InputCollapseContext)
+  const [collapsed, setCollapsed] = useState(false)
+  const voiceActive = voice.status !== 'idle'
+
+  // 自动折叠只在“是否在底部”翻转时触发：上滑离开底部时折叠，回到
+  // 底部时展开。手动点开后不再重复触发，直到下一次底部状态翻转。
+  // 录音 / 转写中不自动折叠，否则录音控制会被藏起来无法停止；
+  // 折叠按钮在录音 / 转写中同样禁用，录完或取消后才能手动折叠。
+  useEffect(() => {
+    if (!autoCollapseInput || voiceActive) {
+      return
+    }
+    setCollapsed(!isAtBottom)
+  }, [isAtBottom, autoCollapseInput, voiceActive])
+
+  const expandInput = useCallback(() => {
+    setCollapsed(false)
+    // 手动点开是明确要输入：恢复焦点；自动展开（回到底部）不抢焦点、不弹键盘。
+    requestAnimationFrame(() => textareaRef.current?.focus({ preventScroll: true }))
+  }, [])
+
+  const collapseInput = useCallback(() => {
+    textareaRef.current?.blur()
+    setCollapsed(true)
+  }, [])
+
   // 排队、上传中或上传失败的附件都留在输入框，全部上传成功后才能发送
   const canSend = !importingHistory && !streaming && voice.status === 'idle' && draftReady
 
@@ -170,6 +202,62 @@ const Input = ({ sessionId }: { sessionId: string | null }) => {
     } else {
       textareaRef.current?.focus()
     }
+  }
+
+  // 折叠态：只剩一条细栏（草稿预览 + 展开箭头）。ContextBar、输入框、附件、
+  // 工具栏与 EffortSlider 全部隐藏，但草稿仍在 store 中，展开后原样恢复。
+  // 流式回答中折叠时保留停止按钮；拖拽遮罩是挂到 body 的 portal，折叠时仍可用。
+  if (collapsed) {
+    const preview = text.trim()
+      ? text.trim()
+      : attachments.length > 0
+        ? t('chatInputCollapsedAttachments', { count: attachments.length })
+        : t('chatInputPlaceholderChat')
+    return (
+      <div
+        className={clsx(
+          styles.wrapper,
+          sessionId === null ? styles.home : styles.session,
+          styles.collapsed
+        )}
+      >
+        <div className={styles.collapsedBar}>
+          <button
+            type="button"
+            className={styles.collapsedExpand}
+            aria-label={t('chatInputExpand')}
+            title={t('chatInputCollapsedHint')}
+            onClick={expandInput}
+          >
+            <span
+              className={clsx(
+                styles.collapsedPreview,
+                (text.trim() || attachments.length > 0) && styles.collapsedPreviewHasDraft
+              )}
+            >
+              {preview}
+            </span>
+            <span className={styles.collapsedChevron} aria-hidden>
+              <IconChevronDownOutline14 />
+            </span>
+          </button>
+          {streaming && sessionId ? (
+            <button
+              type="button"
+              className={styles.sendButton}
+              aria-label={t('chatInputStopButtonTooltip')}
+              onClick={() => {
+                stopReadAloud()
+                stopReply(sessionId)
+              }}
+            >
+              <IconStopFill16 />
+            </button>
+          ) : null}
+        </div>
+        {dragging ? <DragMask /> : null}
+      </div>
+    )
   }
 
   return (
@@ -330,6 +418,17 @@ const Input = ({ sessionId }: { sessionId: string | null }) => {
                 <IconSendOutline16 />
               </button>
             )}
+            <button
+              type="button"
+              className={styles.collapseButton}
+              aria-label={t('chatInputCollapse')}
+              aria-expanded={!collapsed}
+              title={t('chatInputCollapse')}
+              disabled={voiceActive}
+              onClick={collapseInput}
+            >
+              <IconChevronDownOutline14 />
+            </button>
           </div>
         </div>
         {dragging ? <DragMask /> : null}
