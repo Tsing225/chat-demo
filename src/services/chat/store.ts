@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { createId } from '../../utils/id.js'
 import { ApiError, streamMessage } from '../api/client.js'
-import type { ChatModel, CreateMessageRequest } from '../api/types.js'
+import type { ChatModel, CreateMessageRequest, ReasoningEffort } from '../api/types.js'
 import { extractFileIds, getFileErrorCode, isRetryableApiError } from '../api/errors.js'
 import { cancelUpload, describeUploadError, uploadAttachment, useUploads } from '../attachments.js'
 import { getEffectivePrices, withSettledCost } from '../pricing.js'
@@ -257,6 +257,10 @@ export const bindChatPersistence = () => {
     window.removeEventListener('pagehide', save)
   }
 }
+
+/** 旧档位 Middle（持久化里存为 medium）已删除：非 low/high/max 的 effort 一律按 high 跑，与设置迁移一致。 */
+const normalizeEffort = (effort: unknown): ReasoningEffort =>
+  effort === 'low' || effort === 'high' || effort === 'max' ? effort : 'high'
 
 /** 按当前开关创建回复：深度思考对应 thinking，智能搜索控制 deepseek_web_search，推理强度随请求快照。 */
 const createReply = (): AssistantMessage => {
@@ -758,7 +762,7 @@ export const continueReply = (sessionId: string, messageId: string) => {
     model: previous.model ?? MODEL,
     thinking: previous.thinking ?? thinking,
     search: previous.search ?? search,
-    effort: previous.effort ?? reasoningEffort,
+    effort: normalizeEffort(previous.effort ?? reasoningEffort),
     status: 'pending',
     stopReason: undefined,
     stopDetails: undefined,
@@ -1054,7 +1058,7 @@ const streamReply = async (sessionId: string, initial: AssistantMessage, request
             ...(initial.thinking
               ? {
                   output_config: {
-                    effort: initial.effort ?? useSettings.getState().reasoningEffort,
+                    effort: normalizeEffort(initial.effort ?? useSettings.getState().reasoningEffort),
                   },
                 }
               : {}),
