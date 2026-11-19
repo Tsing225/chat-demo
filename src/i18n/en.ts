@@ -23,6 +23,7 @@ export const en = {
   sessionItemMenuRenameOption: 'Rename',
   more: 'More',
   close: 'Close',
+  viewImage: 'View image',
   sessionHistoryTimelineLabelToday: 'Today',
   sessionHistoryTimelineLabelYesterday: 'Yesterday',
   sessionHistoryTimelineLabel7days: '7 Days',

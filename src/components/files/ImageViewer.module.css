@@ -1,0 +1,29 @@
+/* Modal 内容区覆盖：图片查看器要尽量大，而不是 380px 的表单卡片 */
+.viewer {
+  width: min(96vw, 960px);
+  max-width: calc(100vw - 16px);
+  max-height: calc(100dvh - 24px);
+  padding: 12px 16px 16px;
+}
+
+/* 文件名过长时省略，不把关闭按钮挤出去（Modal 的标题栏已给标题留出收缩空间） */
+.title {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 高图在框内纵向滚动查看，不撑出屏幕 */
+.main {
+  overflow: auto;
+  max-height: calc(100dvh - 110px);
+}
+
+.image {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+  border-radius: 12px;
+}

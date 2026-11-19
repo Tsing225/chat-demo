@@ -19,6 +19,7 @@ export const zh = {
   sessionItemMenuRenameOption: '重命名',
   more: '更多',
   close: '关闭',
+  viewImage: '查看图片',
   sessionHistoryTimelineLabelToday: '今天',
   sessionHistoryTimelineLabelYesterday: '昨天',
   sessionHistoryTimelineLabel7days: '7 天内',
@@ -153,7 +154,8 @@ export const zh = {
   voiceInputStop: '结束录音并转写',
   voiceInputCancel: '正在转写，点击取消',
   voiceInputPermissionDenied: '无法使用麦克风，请在浏览器设置中允许访问',
-  voiceInputPermissionDeniedApp: '\u65e0\u6cd5\u4f7f\u7528\u9ea6\u514b\u98ce\uff0c\u8bf7\u5728\u7cfb\u7edf\u8bbe\u7f6e\u4e2d\u5141\u8bb8\u672c\u5e94\u7528\u4f7f\u7528\u9ea6\u514b\u98ce',
+  voiceInputPermissionDeniedApp:
+    '\u65e0\u6cd5\u4f7f\u7528\u9ea6\u514b\u98ce\uff0c\u8bf7\u5728\u7cfb\u7edf\u8bbe\u7f6e\u4e2d\u5141\u8bb8\u672c\u5e94\u7528\u4f7f\u7528\u9ea6\u514b\u98ce',
   voiceInputNoDevice: '未检测到麦克风',
   voiceInputTooLong: '录音过长，请缩短后重试',
   voiceInputFailed: '语音识别失败，请稍后再试',
