@@ -45,3 +45,21 @@
     background-color: var(--dsw-alias-interactive-bg-hover-danger);
   }
 }
+
+.disabled {
+  opacity: 0.45;
+  cursor: default;
+
+  &:hover {
+    background-color: transparent;
+  }
+}
+
+.hint {
+  margin-left: auto;
+  padding-left: 12px;
+  font-size: 12px;
+  line-height: 20px;
+  color: var(--dsw-alias-label-tertiary);
+  white-space: nowrap;
+}

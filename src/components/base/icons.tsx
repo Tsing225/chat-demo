@@ -562,3 +562,43 @@ export const IconArchiveOutline16 = () => (
     <path d="M6.5 8.5H9.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
   </svg>
 )
+/** Plus icon for the composer attach button: two strokes forming a +. */
+export const IconPlusOutline16 = () => (
+  <svg width={16} height={16} viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M8 2.5V13.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+    <path d="M2.5 8H13.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+  </svg>
+)
+
+/** Image icon for the attach-menu photo option: frame, sun dot and mountain line. */
+export const IconImageOutline16 = () => (
+  <svg width={16} height={16} viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect
+      x="2"
+      y="2.5"
+      width="12"
+      height="11"
+      rx="2"
+      stroke="currentColor"
+      strokeWidth="1.4"
+    />
+    <circle cx="5.8" cy="6.3" r="1.3" stroke="currentColor" strokeWidth="1.4" />
+    <path
+      d="M2.5 11.5L6 8L8.5 10.5L11 8L13.5 10.5"
+      stroke="currentColor"
+      strokeWidth="1.4"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+)
+
+/** Apps icon for the attach-menu plugin option: 2x2 grid of rounded squares. */
+export const IconAppsOutline16 = () => (
+  <svg width={16} height={16} viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="2" y="2" width="5" height="5" rx="1.2" stroke="currentColor" strokeWidth="1.4" />
+    <rect x="9" y="2" width="5" height="5" rx="1.2" stroke="currentColor" strokeWidth="1.4" />
+    <rect x="2" y="9" width="5" height="5" rx="1.2" stroke="currentColor" strokeWidth="1.4" />
+    <rect x="9" y="9" width="5" height="5" rx="1.2" stroke="currentColor" strokeWidth="1.4" />
+  </svg>
+)

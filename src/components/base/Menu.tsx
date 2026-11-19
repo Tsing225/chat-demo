@@ -9,7 +9,11 @@ export type MenuOption = {
   label: string
   icon: ReactNode
   danger?: boolean
-  onSelect: () => void
+  /** 置灰不可点：用于尚无可用功能的占位项（如附件菜单里的插件） */
+  disabled?: boolean
+  /** 置灰项右侧的小字说明 */
+  hint?: string
+  onSelect?: () => void
 }
 
 /** 点击触发，向下展开；点外部或 Esc 关闭 */
@@ -46,14 +50,24 @@ export const Menu = ({
                 <div
                   key={option.key}
                   role="menuitem"
-                  className={clsx(styles.option, option.danger && styles.danger)}
-                  onClick={() => {
-                    setOpen(false)
-                    option.onSelect()
-                  }}
+                  aria-disabled={option.disabled || undefined}
+                  className={clsx(
+                    styles.option,
+                    option.danger && styles.danger,
+                    option.disabled && styles.disabled
+                  )}
+                  onClick={
+                    option.disabled
+                      ? undefined
+                      : () => {
+                          setOpen(false)
+                          option.onSelect?.()
+                        }
+                  }
                 >
                   <span className={styles.icon}>{option.icon}</span>
                   {option.label}
+                  {option.hint ? <span className={styles.hint}>{option.hint}</span> : null}
                 </div>
               ))}
             </div>,

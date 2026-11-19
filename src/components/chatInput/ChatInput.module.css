@@ -239,15 +239,15 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-top: 4px;
-  padding: 12px;
+  margin-top: 2px;
+  padding: 10px 12px 12px;
 }
 
 .toggles {
   display: flex;
   flex: 1;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   min-width: 0;
 }
 
@@ -297,8 +297,17 @@
   display: flex;
   flex-shrink: 0;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
   margin-left: auto;
+}
+
+/* ＋ 号按钮：菜单打开时转成 ×，与关闭手势一致 */
+.plusButton svg {
+  transition: transform var(--ds-transition-duration) var(--ds-ease-in-out);
+}
+
+.plusButtonOpen svg {
+  transform: rotate(45deg);
 }
 
 .sendButton {
@@ -339,12 +348,11 @@
   white-space: nowrap;
 }
 
-/* 窄屏工具栏分两行：开关独占一行，操作按钮第二行右对齐。单行放不下
-   两枚四字标签 + 麦克风 / 附件 / 拍照 / 发送（360px 宽时单行约溢出 32px，实测），
-   麦克风会贴到联网搜索标签边缘；分行后不再有任何重叠。同时收紧开关
+/* 窄屏工具栏分两行：开关独占一行，＋ / 麦克风 / 发送 / 折叠第二行右对齐。
+   单行放不下两枚四字标签加一排操作按钮，分行后不再有任何重叠。同时收紧开关
    内边距与字号，让四字中文标签始终完整可见。 */
 /* 折叠控制：functionRow 右侧的收起按钮（发送按钮之后），与发送按钮同尺寸；
-   窄屏下它落在工具栏第二行末尾，与麦克风 / 附件 / 拍照 / 发送同行不重叠。 */
+   窄屏下它落在工具栏第二行末尾，与 ＋ / 麦克风 / 发送同行不重叠。 */
 .collapseButton {
   display: flex;
   align-items: center;
@@ -429,10 +437,12 @@
   transform: rotate(180deg);
 }
 
-@media not all and (min-width: 440px) {
+/* 两排的断点放到 480px：英文标签更宽，440-479px 单行时开关会挤到麦克风上（实测 440px 英文重叠），
+   两排后不再有任何重叠；中文标签窄，440px 本来就能单行放下，但两排同样顺眼。 */
+@media not all and (min-width: 480px) {
   .functionRow {
     flex-wrap: wrap;
-    row-gap: 8px;
+    row-gap: 6px;
   }
 
   .toggles {

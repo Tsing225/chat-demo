@@ -1,10 +1,13 @@
 import clsx from 'clsx'
 import { memo, useCallback, useContext, useEffect, useRef, useState } from 'react'
 import {
+  IconAppsOutline16,
   IconCameraOutline16,
   IconChevronDownOutline14,
   IconGlobeLanguageOutline14,
+  IconImageOutline16,
   IconPaperclipOutline16,
+  IconPlusOutline16,
   IconSendOutline16,
   IconStopFill16,
   IconThinkOutline14,
@@ -24,6 +27,7 @@ import {
 } from '../../services/chat/drafts.js'
 import { stopReadAloud } from '../../services/speech/readAloud.js'
 import { IconButton } from '../base/IconButton.js'
+import { Menu } from '../base/Menu.js'
 import { Tooltip } from '../base/Tooltip.js'
 import { ensureApiKey } from '../settings/settingsDialogState.js'
 import { DragMask, useFileDrop } from './DragMask.js'
@@ -86,6 +90,7 @@ const Input = ({ sessionId }: { sessionId: string | null }) => {
   const search = useSettings((state) => state.search)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const cameraInputRef = useRef<HTMLInputElement | null>(null)
+  const photoInputRef = useRef<HTMLInputElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   const acceptFiles = (files: File[]) => {
@@ -351,14 +356,60 @@ const Input = ({ sessionId }: { sessionId: string | null }) => {
                 }
               }}
             />
-            <IconButton
-              size="m"
-              tone="primary"
-              icon={<IconPaperclipOutline16 />}
-              tooltip={t('uploadFile')}
-              disabled={importingHistory}
-              onClick={() => ensureApiKey() && fileInputRef.current?.click()}
-            />
+            <Menu
+              options={[
+                {
+                  key: 'takePhoto',
+                  label: t('takePhoto'),
+                  icon: <IconCameraOutline16 />,
+                  onSelect: () => {
+                    if (ensureApiKey()) {
+                      cameraInputRef.current?.click()
+                    }
+                  },
+                },
+                {
+                  key: 'photo',
+                  label: t('attachPhoto'),
+                  icon: <IconImageOutline16 />,
+                  onSelect: () => {
+                    if (ensureApiKey()) {
+                      photoInputRef.current?.click()
+                    }
+                  },
+                },
+                {
+                  key: 'file',
+                  label: t('uploadFile'),
+                  icon: <IconPaperclipOutline16 />,
+                  onSelect: () => {
+                    if (ensureApiKey()) {
+                      fileInputRef.current?.click()
+                    }
+                  },
+                },
+                {
+                  // 应用内暂无插件体系：先占位展示，不可点，不收集任何内容。
+                  key: 'plugin',
+                  label: t('attachPlugin'),
+                  icon: <IconAppsOutline16 />,
+                  hint: t('attachPluginEmpty'),
+                  disabled: true,
+                },
+              ]}
+            >
+              {({ open, toggle }) => (
+                <IconButton
+                  size="m"
+                  tone="primary"
+                  icon={<IconPlusOutline16 />}
+                  tooltip={t('attachMenu')}
+                  className={clsx(styles.plusButton, open && styles.plusButtonOpen)}
+                  disabled={importingHistory}
+                  onClick={toggle}
+                />
+              )}
+            </Menu>
             <input
               ref={fileInputRef}
               type="file"
@@ -369,14 +420,6 @@ const Input = ({ sessionId }: { sessionId: string | null }) => {
                 acceptFiles(Array.from(event.target.files ?? []))
                 event.target.value = ''
               }}
-            />
-            <IconButton
-              size="m"
-              tone="primary"
-              icon={<IconCameraOutline16 />}
-              tooltip={t('takePhoto')}
-              disabled={importingHistory}
-              onClick={() => ensureApiKey() && cameraInputRef.current?.click()}
             />
             <input
               ref={(element) => {
@@ -392,6 +435,17 @@ const Input = ({ sessionId }: { sessionId: string | null }) => {
                 if (file) {
                   acceptPhoto(file)
                 }
+                event.target.value = ''
+              }}
+            />
+            <input
+              ref={photoInputRef}
+              type="file"
+              multiple
+              hidden
+              accept="image/*"
+              onChange={(event) => {
+                acceptFiles(Array.from(event.target.files ?? []))
                 event.target.value = ''
               }}
             />
