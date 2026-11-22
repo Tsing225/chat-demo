@@ -33,6 +33,12 @@ import styles from './MessageList.module.css'
 
 /** 距底部小于该值时视为在底部，流式内容增长时跟随 */
 const STICKY_THRESHOLD = 40
+/** 离开底部的回滞：距底部超过 STICKY_THRESHOLD + 该值才视为离开底部。
+ * 必须大于输入框展开与折叠的高度差（实测：空草稿约 200px，特大字号约 201px，
+ * 长草稿 textarea 顶满 336px 上限时约 488px；再留附件行余量），否则折叠会撑大
+ * 滚动区、触发 scrollTop 钳制事件把底部状态翻回 true 再展开，配合 ResizeObserver
+ * 的 scrollToBottom 在慢速上滑时每步都闪烁一次并弹回底部。展开阈值仍是 STICKY_THRESHOLD。 */
+const COLLAPSE_HYSTERESIS = 640
 const EMPTY_VERSIONS: MessageVersions = { ids: [], index: -1 }
 /** 相邻消息间隔超过该值时插入时间分割线；首条消息前始终有一条 */
 const TIME_DIVIDER_GAP = 5 * 60 * 1000
@@ -166,17 +172,21 @@ export const MessageList = ({
       el.scrollTop = scrollTopRef.current
     }
     const onScroll = () => {
-      const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < STICKY_THRESHOLD
+      const distance = el.scrollHeight - el.scrollTop - el.clientHeight
+      const nearBottom = distance < STICKY_THRESHOLD
       // 仅在用户向上滚动时停止跟随底部，布局或内容增高时保持跟随状态。
       if (nearBottom) {
         stickyRef.current = true
       } else if (el.scrollTop < scrollTopRef.current) {
         stickyRef.current = false
       }
-      // 与 stickyRef 用同一判断外露底部状态，供输入框自动折叠 / 展开。
+      // 底部状态用回滞判断，供输入框自动折叠 / 展开：回到 40px 内展开，
+      // 只有上滑到 40 + 640px 外才折叠。折叠后距底部仍大于 40px，且折叠时
+      // scrollTop 不会被钳制（distance 大于高度差），不会翻回展开。
       const nextAtBottom = nearBottom
         ? true
-        : el.scrollTop < scrollTopRef.current
+        : distance > STICKY_THRESHOLD + COLLAPSE_HYSTERESIS &&
+            el.scrollTop < scrollTopRef.current
           ? false
           : isAtBottomRef.current
       if (nextAtBottom !== isAtBottomRef.current) {
