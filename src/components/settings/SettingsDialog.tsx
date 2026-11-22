@@ -416,7 +416,7 @@ const FONT_SIZE_LABEL_KEYS: Record<FontSizeLevel, TranslationKey> = {
   xlarge: 'settingsFontSizeXLarge',
 }
 
-/** 字体大小：跟随系统开关 + 四档滑块；跟随系统开启时滑块禁用，改动立即生效并持久化。 */
+/** 字体大小：跟随系统开关 + 四档滑块；跟随系统开启时滑块禁用，改动立即生效并持久化，滑块下方预览行随字号实时变化。 */
 const FontSizeSetting = () => {
   const t = useTranslate()
   const followSystemFontSize = useSettings((state) => state.followSystemFontSize)
@@ -442,6 +442,7 @@ const FontSizeSetting = () => {
         </div>
       </div>
       <FontSizeSlider disabled={followSystemFontSize} />
+      <div className={styles.fontPreview}>{t('settingsFontSizePreview')}</div>
     </div>
   )
 }

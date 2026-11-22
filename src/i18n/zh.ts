@@ -284,6 +284,7 @@ export const zh = {
   settingsFontSizeStandard: '标准',
   settingsFontSizeLarge: '大',
   settingsFontSizeXLarge: '特大',
+  settingsFontSizePreview: '预览：这是一段示例文字，拖动滑块可立即看到大小变化',
   settingsAutoCollapseInput: '翻看对话时自动折叠输入框',
   settingsAutoCollapseInputDescription: '向上翻看历史消息时收起输入框，回到对话底部时自动展开',
   chatInputCollapse: '折叠输入框',

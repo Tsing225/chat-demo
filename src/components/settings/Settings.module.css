@@ -666,3 +666,12 @@
   color: var(--dsw-alias-brand-text);
   font-weight: 500;
 }
+
+/* 字体大小预览行：字号直接跟 --font-scale，不经 font 简写中转，旧版 WebView 也能立即重绘。 */
+.fontPreview {
+  margin-top: 10px;
+  padding: 0 10px;
+  font-size: calc(16px * var(--font-scale, 1));
+  line-height: calc(28px * var(--font-scale, 1));
+  color: var(--dsw-alias-label-primary);
+}

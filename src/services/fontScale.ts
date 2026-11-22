@@ -50,6 +50,9 @@ export const getSystemFontScale = async (): Promise<number | null> => {
 /** 生效方式：--font-scale 变量乘进主题字号变量与消息 / 侧边栏 / 输入框字号（见 theme.css）。 */
 const applyFontScale = (scale: number) => {
   document.documentElement.style.setProperty('--font-scale', String(scale))
+  // 部分旧版 Android WebView 不会仅因变量变化就重算经自定义属性传入 font 简写的字号，
+  // 要等下一次布局才重绘；同步读一次布局强制重算，改完立即可见，新版引擎上无影响。
+  void document.documentElement.offsetHeight
 }
 
 /** 解析当前应生效的缩放：跟随系统时读原生值（失败则回落手动档位），否则直接用手动档位。 */

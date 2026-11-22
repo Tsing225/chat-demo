@@ -55,6 +55,7 @@ declare const styles: {
   readonly "fontKnob": string;
   readonly "fontTickLabels": string;
   readonly "fontTickLabelActive": string;
+  readonly "fontPreview": string;
 };
 export = styles;
 

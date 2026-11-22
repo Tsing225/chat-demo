@@ -292,6 +292,7 @@ export const en = {
   settingsFontSizeStandard: 'Standard',
   settingsFontSizeLarge: 'Large',
   settingsFontSizeXLarge: 'Extra large',
+  settingsFontSizePreview: 'Preview: sample text that resizes live as you move the slider',
   settingsAutoCollapseInput: 'Auto-collapse input while reading',
   settingsAutoCollapseInputDescription:
     'Collapse the input box when scrolling up through history; expand it again at the bottom',
