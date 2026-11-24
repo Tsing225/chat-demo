@@ -466,6 +466,28 @@ export const selectSession = (id: string) => {
   }
 }
 
+/**
+ * 单条导入的会话（分享链接导入）：已由调用方写入 IndexedDB，这里只把摘要
+ * 插进列表（按更新时间排序）、把详情放进缓存并选中。与 replaceHistory 不同，
+ * 不动其他本地会话。
+ */
+export const addImportedSession = (session: Session) => {
+  if (get().importingHistory) {
+    return
+  }
+  const normalized = normalizeSession(session)
+  touchSession(normalized.id)
+  set((state) => ({
+    sessions: sortSessions([
+      ...state.sessions.filter((item) => item.id !== normalized.id),
+      toSessionSummary(normalized),
+    ]),
+    sessionCache: { ...state.sessionCache, [normalized.id]: normalized },
+    activeId: normalized.id,
+  }))
+  trimSessionCache()
+}
+
 export const renameSession = (id: string, title: string) => {
   if (get().importingHistory || deletingSessions.has(id)) {
     return

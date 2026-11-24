@@ -16,6 +16,11 @@ import {
   exportHistory,
   importHistory,
 } from '../../services/chat/backup.js'
+import {
+  ShareImportError,
+  importShareLink,
+  type ShareImportProgress,
+} from '../../services/chat/history/shareImport.js'
 import { useIsMobile } from '../../app/viewport.js'
 import { useChatStore } from '../../services/chat/store.js'
 import { regionCodes, getRegionName, provinces } from '../../services/location.js'
@@ -120,6 +125,7 @@ const SettingsContent = () => {
               <ApiKeyField editor={apiKeyEditor} />
               <ImportHistory historyImport={historyImport} disabled={historyBusy} />
               <ExportHistory disabled={historyBusy} />
+              <ShareImport disabled={historyBusy} />
               <SettingCell
                 label={t('deleteAllSessions')}
                 status={null}
@@ -747,5 +753,114 @@ const ExportHistory = ({ disabled }: { disabled: boolean }) => {
         </Button>
       }
     />
+  )
+}
+/** 分享链接导入的进度文案。 */
+const shareImportPhaseKey = (phase: ShareImportProgress['phase']): TranslationKey => {
+  switch (phase) {
+    case 'fetch':
+      return 'shareImportFetching'
+    case 'convert':
+      return 'shareImportConverting'
+    case 'files':
+      return 'shareImportDownloadingFiles'
+    case 'save':
+      return 'shareImportSaving'
+  }
+}
+
+/** 从 DeepSeek 分享链接导入单个对话：只新增，不覆盖已有对话。 */
+const useShareImport = () => {
+  const [input, setInput] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [status, setStatus] = useState<Status>(null)
+  const importing = useRef(false)
+
+  const submit = async () => {
+    if (!input.trim() || importing.current) {
+      return
+    }
+    importing.current = true
+    setBusy(true)
+    setStatus(null)
+    try {
+      const result = await importShareLink(input, (progress) => {
+        setStatus({
+          key: shareImportPhaseKey(progress.phase),
+          params: { done: progress.done, total: progress.total },
+        })
+      })
+      setInput('')
+      setStatus({
+        key:
+          result.failedFiles > 0 || result.droppedMessages > 0
+            ? 'shareImportDonePartial'
+            : 'shareImportDone',
+        params: {
+          count: result.turns,
+          failed: result.failedFiles,
+          dropped: result.droppedMessages,
+        },
+      })
+    } catch (error) {
+      if (error instanceof ShareImportError) {
+        setStatus({ key: error.key, error: true })
+      } else {
+        setStatus({
+          key: 'shareImportFailed',
+          params: { message: error instanceof Error ? error.message : String(error) },
+          error: true,
+        })
+      }
+    } finally {
+      importing.current = false
+      setBusy(false)
+    }
+  }
+
+  return { input, setInput, busy, status, submit }
+}
+
+const ShareImport = ({ disabled }: { disabled: boolean }) => {
+  const t = useTranslate()
+  const shareImport = useShareImport()
+  return (
+    <div className={styles.cell}>
+      <div className={styles.apiKey}>
+        <div className={styles.label}>{t('shareImport')}</div>
+        <div className={styles.description}>{t('shareImportDescription')}</div>
+        <div className={styles.apiKeyInput}>
+          <input
+            type="text"
+            placeholder={t('shareImportPlaceholder')}
+            autoComplete="off"
+            spellCheck={false}
+            value={shareImport.input}
+            disabled={disabled || shareImport.busy}
+            onChange={(event) => shareImport.setInput(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' && !event.nativeEvent.isComposing) {
+                void shareImport.submit()
+              }
+            }}
+          />
+          <span className={styles.divider} />
+          <button
+            type="button"
+            className={styles.confirm}
+            disabled={disabled || shareImport.busy || !shareImport.input.trim()}
+            onMouseDown={(event) => event.preventDefault()}
+            onClick={() => void shareImport.submit()}
+          >
+            {shareImport.busy ? t('shareImportImporting') : t('shareImportButton')}
+          </button>
+        </div>
+        {shareImport.status ? (
+          <div className={clsx(styles.description, shareImport.status.error && styles.error)}>
+            {t(shareImport.status.key, shareImport.status.params)}
+          </div>
+        ) : null}
+      </div>
+    </div>
   )
 }
