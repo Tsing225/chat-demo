@@ -5,13 +5,19 @@ import {
   IconArchiveOutline16,
   IconCheckOutline16,
   IconDownloadOutline16,
+  IconLinkOutline16,
   IconEditOutline16,
   IconEllipsisOutline16,
   IconPinOutline16,
   IconTrashOutline16,
 } from '../base/icons.js'
 import { showToast } from '../base/toastState.js'
-import { exportSessionMarkdown } from '../../services/chat/exportSession.js'
+import {
+  exportSessionDocx,
+  exportSessionHtml,
+  exportSessionMarkdown,
+  shareSessionMarkdown,
+} from '../../services/chat/exportSession.js'
 import { renameSession, selectSession, setSessionFlags } from '../../services/chat/store.js'
 import type { SessionSummary } from '../../services/chat/types.js'
 import { IconButton } from '../base/IconButton.js'
@@ -48,6 +54,46 @@ export const SessionItem = memo(function SessionItem({
       showToast({ key: 'sessionExportEmpty' })
     } else {
       showToast({ key: 'sessionExportCopyFailed', type: 'error' })
+    }
+  }
+
+  /** 系统分享：把 Markdown 文本发到其他应用；取消分享不弹错。 */
+  const handleShare = async () => {
+    const result = await shareSessionMarkdown(session.id)
+    if (result === 'shared') {
+      showToast({ key: 'sessionExportShared' })
+    } else if (result === 'empty') {
+      showToast({ key: 'sessionExportEmpty' })
+    } else if (result !== 'cancelled') {
+      showToast({ key: 'sessionExportShareFailed', type: 'error' })
+    }
+  }
+
+  /** Word 文档存到本机 Documents 目录（网页端为下载），结果用 Toast 告知保存位置。 */
+  const handleExportDocx = async () => {
+    const { result, path } = await exportSessionDocx(session.id)
+    if (result === 'saved') {
+      showToast({ key: 'sessionExportDocxSaved', params: { path: path ?? '' } })
+    } else if (result === 'downloaded') {
+      showToast({ key: 'sessionExportDocxDownloaded' })
+    } else if (result === 'empty') {
+      showToast({ key: 'sessionExportEmpty' })
+    } else {
+      showToast({ key: 'sessionExportDocxFailed', type: 'error' })
+    }
+  }
+
+  /** HTML 文件写到缓存后用系统分享发给其他应用（网页端为下载）。 */
+  const handleExportHtml = async () => {
+    const { result } = await exportSessionHtml(session.id)
+    if (result === 'shared') {
+      showToast({ key: 'sessionExportShared' })
+    } else if (result === 'downloaded') {
+      showToast({ key: 'sessionExportHtmlDownloaded' })
+    } else if (result === 'empty') {
+      showToast({ key: 'sessionExportEmpty' })
+    } else if (result !== 'cancelled') {
+      showToast({ key: 'sessionExportHtmlFailed', type: 'error' })
     }
   }
 
@@ -134,6 +180,24 @@ export const SessionItem = memo(function SessionItem({
                 label: t('sessionItemMenuExportOption'),
                 icon: <IconDownloadOutline16 />,
                 onSelect: () => void handleExport(),
+              },
+              {
+                key: 'share',
+                label: t('sessionExportShareOption'),
+                icon: <IconLinkOutline16 />,
+                onSelect: () => void handleShare(),
+              },
+              {
+                key: 'exportDocx',
+                label: t('sessionExportDocxOption'),
+                icon: <IconDownloadOutline16 />,
+                onSelect: () => void handleExportDocx(),
+              },
+              {
+                key: 'exportHtml',
+                label: t('sessionExportHtmlOption'),
+                icon: <IconDownloadOutline16 />,
+                onSelect: () => void handleExportHtml(),
               },
               {
                 key: 'delete',
