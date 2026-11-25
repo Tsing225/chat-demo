@@ -22,7 +22,8 @@ win:
       arch: [x64]
 nsis:
   artifactName: deepseek-for-chat-${version}-setup.${ext}
-  oneClick: true
+  oneClick: false
+  allowToChangeInstallationDirectory: true
   perMachine: false
   createDesktopShortcut: true
   createStartMenuShortcut: true
