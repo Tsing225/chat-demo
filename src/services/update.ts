@@ -1,5 +1,11 @@
 import { create } from 'zustand'
-import { APP_VERSION, RELEASES_LATEST_URL, isNewerVersion } from '../version.js'
+import {
+  APP_VERSION,
+  RELEASES_LATEST_URL,
+  REPO_URL,
+  isNewerVersion,
+} from '../version.js'
+import { isDesktopApp, openExternalUrl } from './desktop.js'
 
 export type AvailableRelease = {
   tag: string
@@ -96,7 +102,7 @@ const parseReleasePayload = (value: unknown): ReleasePayload | null => {
   return { tag, htmlUrl, body: typeof body === 'string' ? body : '', assets: parsedAssets }
 }
 
-export type CheckResult = 'newer' | 'current' | 'no-apk' | 'error'
+export type CheckResult = 'newer' | 'current' | 'no-apk' | 'error' | 'desktop'
 
 let checking: Promise<CheckResult> | null = null
 
@@ -107,6 +113,14 @@ let checking: Promise<CheckResult> | null = null
  * 并发调用共用同一次请求。
  */
 export const checkForUpdate = (manual: boolean): Promise<CheckResult> => {
+  // Desktop (Electron): never offer an APK. A manual check opens the GitHub
+  // releases page in the system browser so the user can fetch the .exe there.
+  if (isDesktopApp()) {
+    if (manual) {
+      void openExternalUrl(`${REPO_URL}/releases`)
+    }
+    return Promise.resolve('desktop')
+  }
   if (checking) {
     return checking
   }

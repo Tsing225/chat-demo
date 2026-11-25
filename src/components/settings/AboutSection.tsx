@@ -58,6 +58,8 @@ const UpdateRow = () => {
         showToast({ key: 'updateCheckFailed', type: 'error' })
       } else if (result === 'no-apk') {
         showToast({ key: 'updateNoApk', type: 'error' })
+      } else if (result === 'desktop') {
+        // Desktop: the releases page was opened in the system browser.
       } else {
         const release = useUpdateStore.getState().latestRelease
         if (release) {
