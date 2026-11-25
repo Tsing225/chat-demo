@@ -1,5 +1,5 @@
 /** Android 应用版本号（唯一的网页侧来源）：关于页展示与更新比较共用。package.json 的 0.1.1 是上游基线，不是应用版本。 */
-export const APP_VERSION = '1.1.4'
+export const APP_VERSION = '1.1.5'
 
 export const GITHUB_REPO = 'Tsing225/chat-demo'
 export const REPO_URL = `https://github.com/${GITHUB_REPO}`

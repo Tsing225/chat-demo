@@ -1,9 +1,9 @@
 # electron-builder config for the Windows desktop build (NSIS + portable).
 # The app version is NOT read from package.json (0.1.1 is the upstream
 # baseline, not the app version): pass it at build time, e.g.
-#   pnpm exec electron-builder --config.extraMetadata.version=1.1.4 --win --x64
-# so artifacts are named deepseek-for-chat-1.1.4-setup.exe /
-# deepseek-for-chat-1.1.4-portable.exe. Build is UNSIGNED (no certificate):
+#   pnpm exec electron-builder --config.extraMetadata.version=1.1.5 --win --x64
+# so artifacts are named deepseek-for-chat-1.1.5-setup.exe /
+# deepseek-for-chat-1.1.5-portable.exe. Build is UNSIGNED (no certificate):
 # Windows SmartScreen will warn on first run.
 appId: com.tsing.deepseekforchat
 productName: deepseek for chat
